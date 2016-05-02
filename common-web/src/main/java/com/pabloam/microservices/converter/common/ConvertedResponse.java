@@ -15,16 +15,14 @@ public interface ConvertedResponse {
 	 * 
 	 * @return
 	 */
-	public String getSource();
+	public String getSourceCurrency();
 
 	/**
 	 * Returns a map with the quotes for the given expectedCurrencies
 	 * 
-	 * @param currencies
-	 *            the currencies expected as result
 	 * @return
 	 */
-	public Map<String, Float> getQuotes(String... expectedCurrencies);
+	public Map<String, Float> getQuotes();
 
 	/**
 	 * The timestamp returned from the provider
@@ -45,6 +43,6 @@ public interface ConvertedResponse {
 	 * 
 	 * @return
 	 */
-	public LocalDate getDate();
+	public LocalDate getHistoryDate();
 
 }

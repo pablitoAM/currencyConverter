@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.pabloam.microservices.converter.common.ConvertedResponse;
-import com.pabloam.microservices.converter.common.RefreshPeriodEnum;
+import com.pabloam.microservices.converter.common.RefreshIntervalEnum;
 import com.pabloam.microservices.converter.common.exceptions.JsonException;
 import com.pabloam.microservices.converter.provider.services.ProviderServices;
 
@@ -49,7 +49,7 @@ public class QueryController {
 	 * @return
 	 */
 	@RequestMapping(value = "/provider/getRefreshInterval", method = RequestMethod.GET)
-	public Observable<RefreshPeriodEnum> getRefreshInterval() {
+	public Observable<RefreshIntervalEnum> getRefreshInterval() {
 		return Observable.just(providerServices.getRefreshInterval());
 	}
 

@@ -6,7 +6,7 @@ package com.pabloam.microservices.converter.common;
  * @author Pablo
  *
  */
-public enum RefreshPeriodEnum {
+public enum RefreshIntervalEnum {
 
 	YEARLY, MONTHLY, WEEKLY, DAILY, HOURLY, MINUTE, INSTANT
 

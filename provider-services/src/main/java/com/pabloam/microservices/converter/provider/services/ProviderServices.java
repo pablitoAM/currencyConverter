@@ -3,7 +3,7 @@ package com.pabloam.microservices.converter.provider.services;
 import java.time.LocalDate;
 
 import com.pabloam.microservices.converter.common.ConvertedResponse;
-import com.pabloam.microservices.converter.common.RefreshPeriodEnum;
+import com.pabloam.microservices.converter.common.RefreshIntervalEnum;
 
 public interface ProviderServices {
 
@@ -19,7 +19,7 @@ public interface ProviderServices {
 	 * 
 	 * @return
 	 */
-	public RefreshPeriodEnum getRefreshInterval();
+	public RefreshIntervalEnum getRefreshInterval();
 
 	/**
 	 * Returns a convertedResponse with the current rates for the given

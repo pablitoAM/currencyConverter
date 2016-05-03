@@ -1,11 +1,10 @@
 package com.pabloam.microservices.converter.provider.web;
 
-import java.time.LocalDate;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,6 +30,7 @@ public class QueryController {
 	/**
 	 * The provider services implemented an exchange provider
 	 */
+	@Autowired
 	private ProviderServices providerServices;
 
 	/**
@@ -62,8 +62,7 @@ public class QueryController {
 	 * @return
 	 */
 	@RequestMapping(value = "provider/getCurrent/{sourceCurrency}/{expectedCurrencies}")
-	public Observable<ConvertedResponse> getCurrentRates(@PathVariable String sourceCurrency,
-			@PathVariable String[] expectedCurrencies) {
+	public Observable<ConvertedResponse> getCurrentRates(@PathVariable String sourceCurrency, @PathVariable String[] expectedCurrencies) {
 		return Observable.just(providerServices.getCurrentRates(sourceCurrency, expectedCurrencies));
 	}
 
@@ -79,16 +78,13 @@ public class QueryController {
 	@RequestMapping(value = "provider/getHistorical/{date}/{sourceCurrency}/{expectedCurrencies}")
 	public Observable<ConvertedResponse> getCurrentRates(@PathVariable String date, @PathVariable String sourceCurrency,
 			@PathVariable String[] expectedCurrencies) {
-
-		LocalDate dateTime = LocalDate.parse(date);
-		return Observable.just(providerServices.getHistoricalRates(sourceCurrency, dateTime, expectedCurrencies));
+		return Observable.just(providerServices.getHistoricalRates(sourceCurrency, date, expectedCurrencies));
 	}
 
 	// Error Handling
-	@ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "Request Exception")
 	@ExceptionHandler(Exception.class)
-	public @ResponseBody JsonException handleRestException(HttpServletRequest request, Exception ex) {
+	public @ResponseBody String handleRestException(HttpServletRequest request, Exception ex) {
 		logger.error(ex.getMessage(), ex);
-		return new JsonException(request.getRequestURL().toString(), ex);
+		return String.format("Exception in request: '%s' - message: '%s'", request.getRequestURL().toString(), ex.getMessage());
 	}
 }

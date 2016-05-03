@@ -7,7 +7,7 @@ package com.pabloam.microservices.converter.provider.exceptions;
  * @author PabloAM
  *
  */
-public class ConvertionException extends RuntimeException {
+public class ConversionException extends RuntimeException {
 
 	/**
 	 * 
@@ -17,14 +17,14 @@ public class ConvertionException extends RuntimeException {
 	/**
 	 * 
 	 */
-	public ConvertionException() {
+	public ConversionException() {
 		// TODO Auto-generated constructor stub
 	}
 
 	/**
 	 * @param arg0
 	 */
-	public ConvertionException(String arg0) {
+	public ConversionException(String arg0) {
 		super(arg0);
 		// TODO Auto-generated constructor stub
 	}
@@ -32,7 +32,7 @@ public class ConvertionException extends RuntimeException {
 	/**
 	 * @param arg0
 	 */
-	public ConvertionException(Throwable arg0) {
+	public ConversionException(Throwable arg0) {
 		super(arg0);
 		// TODO Auto-generated constructor stub
 	}
@@ -41,7 +41,7 @@ public class ConvertionException extends RuntimeException {
 	 * @param arg0
 	 * @param arg1
 	 */
-	public ConvertionException(String arg0, Throwable arg1) {
+	public ConversionException(String arg0, Throwable arg1) {
 		super(arg0, arg1);
 		// TODO Auto-generated constructor stub
 	}
@@ -52,7 +52,7 @@ public class ConvertionException extends RuntimeException {
 	 * @param arg2
 	 * @param arg3
 	 */
-	public ConvertionException(String arg0, Throwable arg1, boolean arg2, boolean arg3) {
+	public ConversionException(String arg0, Throwable arg1, boolean arg2, boolean arg3) {
 		super(arg0, arg1, arg2, arg3);
 		// TODO Auto-generated constructor stub
 	}

@@ -1,7 +1,5 @@
 package com.pabloam.microservices.converter.provider.services;
 
-import java.time.LocalDate;
-
 import com.pabloam.microservices.converter.common.ConvertedResponse;
 import com.pabloam.microservices.converter.common.RefreshIntervalEnum;
 import com.pabloam.microservices.converter.provider.exceptions.RequestException;
@@ -48,6 +46,6 @@ public interface ProviderServices {
 	 * @return
 	 * @throws RequestException
 	 */
-	public ConvertedResponse getHistoricalRates(String sourceCurrency, LocalDate date, String... expectedCurrencies) throws RequestException;
+	public ConvertedResponse getHistoricalRates(String sourceCurrency, String date, String... expectedCurrencies) throws RequestException;
 
 }

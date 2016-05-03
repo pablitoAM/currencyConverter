@@ -3,9 +3,10 @@
  */
 package com.pabloam.microservices.converter.provider.services.impl;
 
+import java.net.URI;
+import java.text.ParseException;
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.stream.Collectors;
+import java.time.format.DateTimeParseException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +18,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import com.pabloam.microservices.converter.common.ConvertedResponse;
 import com.pabloam.microservices.converter.common.RefreshIntervalEnum;
@@ -28,12 +28,13 @@ import com.pabloam.microservices.converter.provider.exceptions.BadResponseExcept
 import com.pabloam.microservices.converter.provider.exceptions.RequestException;
 import com.pabloam.microservices.converter.provider.services.ConverterServices;
 import com.pabloam.microservices.converter.provider.services.ProviderServices;
+import com.pabloam.microservices.converter.provider.services.UriCreator;
 
 /**
  * @author PabloAM
  *
  */
-@Service
+@Component
 @Profile("currencylayer")
 public class CurrencyLayerImpl implements ProviderServices {
 
@@ -41,6 +42,18 @@ public class CurrencyLayerImpl implements ProviderServices {
 
 	// The logger
 	final Logger logger = (Logger) LoggerFactory.getLogger(CurrencyLayerImpl.class);
+
+	// ===============================
+	// Properties
+	// ===============================
+
+	/**
+	 * 
+	 */
+	public CurrencyLayerImpl() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
 	/**
 	 * The name of the provider
@@ -71,6 +84,16 @@ public class CurrencyLayerImpl implements ProviderServices {
 	 */
 	@Autowired
 	private ConverterServices converterServices;
+
+	/**
+	 * The uri creator for the invocations
+	 */
+	@Autowired
+	private UriCreator uriCreator;
+
+	// ===============================
+	// Implementation
+	// ===============================
 
 	/*
 	 * (non-Javadoc)
@@ -110,22 +133,13 @@ public class CurrencyLayerImpl implements ProviderServices {
 			verifyExpectedCurrencies(expectedCurrencies);
 			verifySourceCurrency(sourceCurrency);
 
-			HttpHeaders headers = new HttpHeaders();
-			headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
-			HttpEntity<?> entity = new HttpEntity<>(headers);
-
-			// @formatter:off
-			UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(URL)
-					.queryParam("access_key", this.apiKey)
-					.queryParam("source ", sourceCurrency)
-					.queryParam("currencies ",
-							Arrays.asList(expectedCurrencies).stream().collect(Collectors.joining(", ")));
-			// @formatter:on
+			URI uri = this.uriCreator.createCurrentUri(URL, this.apiKey, sourceCurrency, expectedCurrencies);
 
 			// Invocation to the API
-			ResponseEntity<String> response = this.restTemplate.exchange(builder.build().encode().toUri(), HttpMethod.GET, entity, String.class);
+			ResponseEntity<String> response = this.restTemplate.exchange(uri, HttpMethod.GET, getRequestEntity(), String.class);
 
 			verifyResponse(response);
+
 			return this.converterServices.convert(response.getBody());
 
 		} catch (Exception e) {
@@ -143,9 +157,56 @@ public class CurrencyLayerImpl implements ProviderServices {
 	 * java.lang.String[])
 	 */
 	@Override
-	public ConvertedResponse getHistoricalRates(String sourceCurrency, LocalDate date, String... expectedCurrencies) {
-		// TODO Auto-generated method stub
-		return null;
+	public ConvertedResponse getHistoricalRates(String sourceCurrency, String date, String... expectedCurrencies) {
+		try {
+			verifySourceCurrency(sourceCurrency);
+			verifyExpectedCurrencies(expectedCurrencies);
+			verifyDate(date);
+
+			URI uri = this.uriCreator.createHistoricalUri(URL, this.apiKey, sourceCurrency, date, expectedCurrencies);
+
+			// Invocation to the API
+			ResponseEntity<String> response = this.restTemplate.exchange(uri, HttpMethod.GET, getRequestEntity(), String.class);
+
+			verifyResponse(response);
+
+			return this.converterServices.convert(response.getBody());
+
+		} catch (Exception e) {
+			logger.error("Exception in getHistoricalRates[{}]: {}", this.providerName, e.getMessage(), e);
+			throw new RequestException(e.getMessage(), e);
+		}
+
+	}
+
+	// ===============================
+	// Private Methods
+	// ===============================
+
+	/**
+	 * Prepares the request entity for JSON
+	 * 
+	 * @return
+	 */
+	private HttpEntity<?> getRequestEntity() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
+		HttpEntity<?> entity = new HttpEntity<>(headers);
+		return entity;
+	}
+
+	/**
+	 * Verifies if the date is in a YYYY-MM-DD format
+	 * 
+	 * @param date
+	 * @throws ParseException
+	 */
+	private void verifyDate(String date) {
+		try {
+			LocalDate localDate = LocalDate.parse(date);
+		} catch (DateTimeParseException | NullPointerException e) {
+			throw new IllegalArgumentException("The date is not valid.", e);
+		}
 	}
 
 	/**

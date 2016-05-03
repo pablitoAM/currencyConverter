@@ -1,7 +1,7 @@
 package com.pabloam.microservices.converter.provider.services;
 
 import com.pabloam.microservices.converter.common.ConvertedResponse;
-import com.pabloam.microservices.converter.provider.exceptions.ConvertionException;
+import com.pabloam.microservices.converter.provider.exceptions.ConversionException;
 
 public interface ConverterServices {
 
@@ -12,6 +12,6 @@ public interface ConverterServices {
 	 *            the received response in json
 	 * @return
 	 */
-	ConvertedResponse convert(String jsonResponse) throws ConvertionException;
+	ConvertedResponse convert(String jsonResponse) throws ConversionException;
 
 }

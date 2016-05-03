@@ -22,7 +22,7 @@ public interface ConvertedResponse {
 	 * 
 	 * @return
 	 */
-	public Map<String, Float> getQuotes();
+	public Map<String, Double> getQuotes();
 
 	/**
 	 * The timestamp returned from the provider

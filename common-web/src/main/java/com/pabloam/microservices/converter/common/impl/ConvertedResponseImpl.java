@@ -22,7 +22,7 @@ public class ConvertedResponseImpl implements ConvertedResponse {
 	/**
 	 * The quotes for the expected currencies
 	 */
-	private Map<String, Float> quotes;
+	private Map<String, Double> quotes;
 
 	/**
 	 * The request timestamp
@@ -56,7 +56,7 @@ public class ConvertedResponseImpl implements ConvertedResponse {
 	 * com.pabloam.microservices.converter.common.ConvertedResponse#getQuotes(
 	 * java.lang.String[])
 	 */
-	public Map<String, Float> getQuotes() {
+	public Map<String, Double> getQuotes() {
 		return this.quotes;
 	}
 
@@ -92,7 +92,7 @@ public class ConvertedResponseImpl implements ConvertedResponse {
 		return this.historyDate;
 	}
 
-	public void setQuotes(Map<String, Float> quotes) {
+	public void setQuotes(Map<String, Double> quotes) {
 		this.quotes = quotes;
 	}
 

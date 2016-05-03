@@ -117,7 +117,7 @@ public class CurrencyLayerConverterImplTest {
 
 		// The quotes have been polished, but the size must be the same
 		@SuppressWarnings("unchecked")
-		Map<String, Float> quotesMap = (Map<String, Float>) convertedMap.get("quotes");
+		Map<String, Double> quotesMap = (Map<String, Double>) convertedMap.get("quotes");
 		assertEquals(quotesMap.size(), actual.getQuotes().size());
 
 		return actual;
@@ -199,12 +199,12 @@ public class CurrencyLayerConverterImplTest {
 
 		map.put("success", true);
 
-		map.put("source", "USD");
+		map.put("source", "EUR");
 		map.put("timestamp", Instant.now().toEpochMilli());
 
-		Map<String, Float> quotesMap = new HashMap<String, Float>();
-		quotesMap.put("USDABC", 3.456f);
-		quotesMap.put("USDBCD", 7.890f);
+		Map<String, Double> quotesMap = new HashMap<String, Double>();
+		quotesMap.put("EURABC", 3.456);
+		quotesMap.put("EURBCD", 7.890);
 
 		map.put("quotes", quotesMap);
 

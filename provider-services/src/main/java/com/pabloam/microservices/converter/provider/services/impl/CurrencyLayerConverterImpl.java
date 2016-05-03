@@ -116,10 +116,10 @@ public class CurrencyLayerConverterImpl implements ConverterServices {
 
 		// Quotes
 		@SuppressWarnings("unchecked")
-		Map<String, Float> quotes = (Map<String, Float>) responseMap.get("quotes");
+		Map<String, Double> quotes = (Map<String, Double>) responseMap.get("quotes");
 		if (!CollectionUtils.isEmpty(quotes)) {
 			// Polish quotes removing the leading source acronyms.
-			Map<String, Float> polishedQuotes = quotes.entrySet().stream().collect(Collectors.toMap(e -> polishKey(source, e.getKey()), e -> e.getValue()));
+			Map<String, Double> polishedQuotes = quotes.entrySet().stream().collect(Collectors.toMap(e -> polishKey(source, e.getKey()), e -> e.getValue()));
 			response.setQuotes(polishedQuotes);
 		} else {
 			throw new ConversionException("The response must contain quotes");

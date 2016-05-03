@@ -1,10 +1,7 @@
 package com.pabloam.microservices.converter.provider.services.impl;
 
-import java.util.Map;
-
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import com.pabloam.microservices.converter.common.ConvertedResponse;
 import com.pabloam.microservices.converter.provider.exceptions.ConvertionException;
@@ -22,12 +19,8 @@ public class CurrencyLayerConverterImpl implements ConverterServices {
 	 * convert(java.lang.String)
 	 */
 	@Override
-	public ConvertedResponse convert(Map<String, Object> response) throws ConvertionException {
-		if (CollectionUtils.isEmpty(response)) {
-			throw new ConvertionException("The response to convert cannot be null");
-		}
+	public ConvertedResponse convert(String jsonResponse) throws ConvertionException {
 		return null;
-
 	}
 
 }

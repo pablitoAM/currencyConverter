@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import com.pabloam.microservices.converter.common.ConvertedResponse;
 import com.pabloam.microservices.converter.common.RefreshIntervalEnum;
+import com.pabloam.microservices.converter.provider.exceptions.RequestException;
 
 public interface ProviderServices {
 
@@ -22,7 +23,7 @@ public interface ProviderServices {
 	public RefreshIntervalEnum getRefreshInterval();
 
 	/**
-	 * Returns a convertedResponse with the current rates for the given
+	 * /** Returns a convertedResponse with the current rates for the given
 	 * sourceCurrency
 	 * 
 	 * @param sourceCurrency
@@ -30,8 +31,9 @@ public interface ProviderServices {
 	 * @param expectedCurrencies
 	 *            the expected currency acronyms
 	 * @return
+	 * @throws RequestException
 	 */
-	public ConvertedResponse getCurrentRates(String sourceCurrency, String... expectedCurrencies);
+	public ConvertedResponse getCurrentRates(String sourceCurrency, String... expectedCurrencies) throws RequestException;
 
 	/**
 	 * Returns a convertedResponse with the historical rates for the given
@@ -44,7 +46,8 @@ public interface ProviderServices {
 	 * @param expectedCurrencies
 	 *            the expected currency acronyms
 	 * @return
+	 * @throws RequestException
 	 */
-	public ConvertedResponse getHistoricalRates(String sourceCurrency, LocalDate date, String... expectedCurrencies);
+	public ConvertedResponse getHistoricalRates(String sourceCurrency, LocalDate date, String... expectedCurrencies) throws RequestException;
 
 }

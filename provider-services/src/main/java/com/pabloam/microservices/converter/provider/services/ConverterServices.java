@@ -1,7 +1,5 @@
 package com.pabloam.microservices.converter.provider.services;
 
-import java.util.Map;
-
 import com.pabloam.microservices.converter.common.ConvertedResponse;
 import com.pabloam.microservices.converter.provider.exceptions.ConvertionException;
 
@@ -14,6 +12,6 @@ public interface ConverterServices {
 	 *            the received response in json
 	 * @return
 	 */
-	ConvertedResponse convert(Map<String, Object> jsonResponse) throws ConvertionException;
+	ConvertedResponse convert(String jsonResponse) throws ConvertionException;
 
 }

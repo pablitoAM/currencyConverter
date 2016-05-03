@@ -11,10 +11,12 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import com.google.common.base.Verify;
 import com.pabloam.microservices.converter.common.RefreshIntervalEnum;
+import com.pabloam.microservices.converter.provider.exceptions.RequestException;
+import com.pabloam.microservices.converter.provider.services.ConverterServices;
 
 /**
  * @author PabloAM
@@ -26,14 +28,26 @@ public class CurrencyLayerImplTest {
 	@Mock
 	private RestTemplate restTemplate;
 
+	@Mock
+	private ConverterServices converterServices;
+
 	@InjectMocks
 	private CurrencyLayerImpl currencyLayerImpl;
+
+	String sourceCurrency;
+	String expected1;
+	String expected2;
 
 	/**
 	 * @throws java.lang.Exception
 	 */
 	@Before
 	public void setUp() throws Exception {
+
+		this.sourceCurrency = "SRC";
+		this.expected1 = "EXP1";
+		this.expected2 = "EXP2";
+
 	}
 
 	/**
@@ -78,25 +92,46 @@ public class CurrencyLayerImplTest {
 	public void testGetCurrentRates() throws Exception {
 		/*
 		 * When invoked verify all the parameters are right. Then verify the
-		 * invocation with the restTemplate is made.
+		 * invocation with the restTemplate is made. And then verify the
+		 * invocation to the converter is right.
 		 */
-		String sourceCurrency = "SRC";
-		String expected1 = "EXP1";
-		String expected2 = "EXP2";
 
-		
 		this.currencyLayerImpl.getCurrentRates(sourceCurrency, expected1, expected2);
 
-		
 	}
 
-	@Test
-	public void testGetCurrentRatesNoExpected	() throws Exception {
-		throw new RuntimeException("not yet implemented");
+	@Test(expected = RequestException.class)
+	public void testGetCurrentRatesNoSourceCurrency() throws Exception {
+		/*
+		 * When invoked verify that sourceCurrency cannot be null nor empty and
+		 * throw exception in that case.
+		 */
+		this.currencyLayerImpl.getCurrentRates(null, expected1, expected2);
 	}
 
-	@Test
-	public void testGetCurrentRatesNoSource() throws Exception {
+	@Test(expected = RequestException.class)
+	public void testGetCurrentRatesNoExpectedCurrencies() throws Exception {
+		/*
+		 * When invoked verify that expectedCurrencies cannot be null nor empty
+		 * and throw exception in that case.
+		 */
+		this.currencyLayerImpl.getCurrentRates(sourceCurrency, null);
+	}
+
+	@Test(expected = RequestException.class)
+	public void testGetCurrentRatesWrongResponse() throws Exception {
+		/*
+		 * When invoked verify that the response is not a 4xx or 5xx, if so,
+		 * then throw exception
+		 */
+
+//		ResponseEntity<String> mockedResponse = mock(ResponseEntity.class);
+//		doReturn(mockedResponse).when(this.restTemplate);
+		this.currencyLayerImpl.getCurrentRates(sourceCurrency, expected1, expected2);
+	}
+
+	@Test(expected = RequestException.class)
+	public void testGetCurrentRatesWrongConversion() throws Exception {
 		throw new RuntimeException("not yet implemented");
 	}
 

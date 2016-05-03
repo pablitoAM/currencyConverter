@@ -1,8 +1,3 @@
-/**
- * Copyright (c) 2016 Molenaar Strategie BV.
- * Created: 3 May 2016 09:52:53 Author: Pablo
- */
-
 package com.pabloam.microservices.converter.provider.services.impl;
 
 import static org.junit.Assert.*;

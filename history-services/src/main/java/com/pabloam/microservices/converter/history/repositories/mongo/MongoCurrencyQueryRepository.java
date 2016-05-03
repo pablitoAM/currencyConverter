@@ -1,8 +1,3 @@
-/**
- * Copyright (c) 2016 Molenaar Strategie BV.
- * Created: 3 May 2016 15:23:18 Author: Pablo
- */
-
 package com.pabloam.microservices.converter.history.repositories.mongo;
 
 import static com.mongodb.client.model.Sorts.descending;

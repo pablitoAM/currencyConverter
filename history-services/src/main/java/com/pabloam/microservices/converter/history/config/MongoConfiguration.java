@@ -1,8 +1,3 @@
-/**
- * Copyright (c) 2016 Molenaar Strategie BV.
- * Created: 3 May 2016 15:15:49 Author: Pablo
- */
-
 package com.pabloam.microservices.converter.history.config;
 
 import org.slf4j.Logger;

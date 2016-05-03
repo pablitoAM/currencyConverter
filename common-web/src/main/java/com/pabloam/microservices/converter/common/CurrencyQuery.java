@@ -1,8 +1,3 @@
-/**
- * Copyright (c) 2016 Molenaar Strategie BV.
- * Created: 3 May 2016 15:44:07 Author: Pablo
- */
-
 package com.pabloam.microservices.converter.common;
 
 import java.util.Map;

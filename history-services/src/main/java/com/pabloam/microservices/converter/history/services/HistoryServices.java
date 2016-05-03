@@ -1,8 +1,7 @@
 package com.pabloam.microservices.converter.history.services;
 
 import java.util.List;
-
-import com.pabloam.microservices.converter.common.CurrencyQuery;
+import java.util.Map;
 
 public interface HistoryServices {
 
@@ -13,6 +12,17 @@ public interface HistoryServices {
 	 * @param userName
 	 * @return
 	 */
-	public List<CurrencyQuery> getLastQueriesOf(int number, String userName);
+	public List<Map<String, Object>> getLastQueriesOf(int number, String userName);
+
+	/**
+	 * Saves the given currencyQuery in the databese for the given user and for
+	 * the given provider.
+	 * 
+	 * @param provider
+	 * @param userName
+	 * @param currencyQuery
+	 * @return
+	 */
+	public Boolean save(String provider, String userName, Map<String, Object> currencyQuery);
 
 }

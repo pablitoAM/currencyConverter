@@ -1,12 +1,7 @@
-/**
- * Copyright (c) 2016 Molenaar Strategie BV.
- * Created: 3 May 2016 17:17:56 Author: Pablo
- */
-
 package com.pabloam.microservices.converter.history.repositories.mongo;
 
 import static com.mongodb.client.model.Sorts.descending;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -63,8 +58,10 @@ public class MongoCurrencyQueryRepositoryTest {
 	@Test
 	public void testGetLastQueriesOf() throws Exception {
 		/*
-		 * Insert multiple for a user, and retrieve the last ten by creation
-		 * date
+		 * Insert multiple queries for a user, and retrieve the last ten by
+		 * creation date. To prove it we store the last ten creation dates in a
+		 * list. Then we check if the retrieved queries have exactly the same
+		 * creation dates
 		 */
 		String userName = "Test user";
 		String provider = "Random provider";
@@ -73,7 +70,7 @@ public class MongoCurrencyQueryRepositoryTest {
 		int numberOfQueriesToRetrieve = 10;
 
 		List<Document> queriesToInsert = new ArrayList<Document>(maxQueriesToInsert);
-		List<Map<String, Object>> expected = new ArrayList<Map<String, Object>>(numberOfQueriesToRetrieve);
+		List<Long> expectedCreationDates = new ArrayList<Long>(numberOfQueriesToRetrieve);
 
 		for (int i = maxQueriesToInsert - 1; i >= 0; i--) {
 			Document currencyQuery = (Document) getCurrencyQueryDocument(true);
@@ -85,7 +82,7 @@ public class MongoCurrencyQueryRepositoryTest {
 			queriesToInsert.add(currencyQuery);
 
 			if (i < numberOfQueriesToRetrieve) {
-				expected.add(currencyQuery);
+				expectedCreationDates.add((Long) currencyQuery.get("created"));
 			}
 
 		}
@@ -97,13 +94,11 @@ public class MongoCurrencyQueryRepositoryTest {
 		List<Map<String, Object>> lastQueriesOf = this.repository.getLastQueriesOf(numberOfQueriesToRetrieve, userName);
 
 		// Verify last ten
-		assertEquals(numberOfQueriesToRetrieve, lastQueriesOf.size());
+		assertEquals(expectedCreationDates.size(), lastQueriesOf.size());
 
-		lastQueriesOf.stream().forEach(query -> {
-			
+		lastQueriesOf.stream().forEach(e -> {
 			// Verify the queries are the expected
-			
-			
+			assertTrue(expectedCreationDates.contains(e.get("created")));
 		});
 
 	}
@@ -151,8 +146,6 @@ public class MongoCurrencyQueryRepositoryTest {
 	 */
 	private Map<String, Object> getCurrencyQueryDocument(boolean isHistorical) {
 		Map<String, Object> map = new Document();
-
-		map.put("success", true);
 
 		map.put("source", "EUR");
 		map.put("timestamp", Instant.now().toEpochMilli());

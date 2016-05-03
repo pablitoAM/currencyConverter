@@ -1,4 +1,4 @@
-package com.pabloam.microservices.converter.provider.config;
+package com.pabloam.microservices.converter.history.config;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,23 +8,13 @@ import javax.annotation.Resource;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 
-import com.pabloam.microservices.converter.provider.web.ObservableReturnValueHandler;
+import com.pabloam.microservices.converter.history.web.ObservableReturnValueHandler;
 
-/**
- * @author Pablo
- *
- */
 @Configuration
-public class ProviderServicesConfig {
-
-	@Bean
-	RestTemplate restTemplate() {
-		return new RestTemplate();
-	}
+public class HistorySericesConfiguration {
 
 	// ===============================
 	// This part encapsulates the usage of Spring deferred result into

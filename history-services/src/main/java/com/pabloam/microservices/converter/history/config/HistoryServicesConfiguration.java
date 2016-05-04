@@ -14,7 +14,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import com.pabloam.microservices.converter.history.web.ObservableReturnValueHandler;
 
 @Configuration
-public class HistorySericesConfiguration {
+public class HistoryServicesConfiguration {
 
 	// ===============================
 	// This part encapsulates the usage of Spring deferred result into

@@ -1,16 +1,16 @@
 package com.pabloam.microservices.converter.user.model;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -24,17 +24,19 @@ public class Group implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "ID", unique = true, nullable = false)
+	@Column(name = "ID")
 	private Long id;
 
 	@Column(name = "DESCRIPTION", length = 50, nullable = false)
 	private String description;
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "groups", cascade = CascadeType.ALL)
-	private List<User> users;
+	@ManyToMany
+	@JoinTable(name = "USER2GROUP", joinColumns = { @JoinColumn(name = "GROUP_ID") }, inverseJoinColumns = { @JoinColumn(name = "USER_ID") })
+	private Set<User> users;
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "permissions", cascade = CascadeType.ALL)
-	private List<Permission> permissions;
+	@ManyToMany
+	@JoinTable(name = "PERMISSION2GROUP", joinColumns = { @JoinColumn(name = "GROUP_ID") }, inverseJoinColumns = { @JoinColumn(name = "PERMISSION_ID") })
+	private Set<Permission> permissions;
 
 	public Long getId() {
 		return id;
@@ -52,19 +54,19 @@ public class Group implements Serializable {
 		this.description = description;
 	}
 
-	public List<User> getUsers() {
+	public Set<User> getUsers() {
 		return users;
 	}
 
-	public void setUsers(List<User> users) {
+	public void setUsers(Set<User> users) {
 		this.users = users;
 	}
 
-	public List<Permission> getPermissions() {
+	public Set<Permission> getPermissions() {
 		return permissions;
 	}
 
-	public void setPermissions(List<Permission> permissions) {
+	public void setPermissions(Set<Permission> permissions) {
 		this.permissions = permissions;
 	}
 

@@ -1,16 +1,16 @@
 package com.pabloam.microservices.converter.user.model;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 @Entity
@@ -24,14 +24,15 @@ public class Permission implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "ID", unique = true, nullable = false)
+	@Column(name = "ID")
 	private Long id;
 
-	@Column(name = "DESCRIPTION", length = 50, nullable = false)
+	@Column(name = "DESCRIPTION", length = 50, nullable = false, unique = true)
 	private String description;
 
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "permissions", cascade = CascadeType.ALL)
-	private List<Group> groups;
+	@ManyToMany
+	@JoinTable(name = "PERMISSION2GROUP", joinColumns = { @JoinColumn(name = "PERMISSION_ID") }, inverseJoinColumns = { @JoinColumn(name = "GROUP_ID") })
+	private Set<Group> groups;
 
 	public Long getId() {
 		return id;
@@ -49,11 +50,11 @@ public class Permission implements Serializable {
 		this.description = description;
 	}
 
-	public List<Group> getGroups() {
+	public Set<Group> getGroups() {
 		return groups;
 	}
 
-	public void setGroups(List<Group> groups) {
+	public void setGroups(Set<Group> groups) {
 		this.groups = groups;
 	}
 

@@ -27,7 +27,9 @@ import org.springframework.util.StringUtils;
 
 import com.pabloam.microservices.converter.user.exception.RegistrationException;
 import com.pabloam.microservices.converter.user.exception.UserServicesException;
+import com.pabloam.microservices.converter.user.model.Group;
 import com.pabloam.microservices.converter.user.model.User;
+import com.pabloam.microservices.converter.user.repositories.GroupDao;
 import com.pabloam.microservices.converter.user.repositories.UserDao;
 import com.pabloam.microservices.converter.user.services.UserServices;
 
@@ -44,6 +46,9 @@ public class UserServicesImpl implements UserServices {
 
 	@Autowired
 	private UserDao userDao;
+
+	@Autowired
+	private GroupDao groupDao;
 
 	/**
 	 * @see org.springframework.security.core.userdetails.UserDetailsService#loadUserByUsername(java.lang.String)
@@ -68,11 +73,17 @@ public class UserServicesImpl implements UserServices {
 	 * @see com.pabloam.microservices.converter.user.services.UserServices#register(com.pabloam.microservices.converter.user.model.User)
 	 */
 	@Override
-	public User register(User user) {
+	public User register(User user, List<String> defaultUserGroups) {
 		try {
 			verifyUser(user);
 			user.setCreated(Instant.now(Clock.systemUTC()).toEpochMilli());
 			user.setDeleted(false);
+
+			if (!CollectionUtils.isEmpty(defaultUserGroups)) {
+				List<Group> defaultGroups = this.groupDao.findMultipleByDescriptionList(defaultUserGroups);
+				user.setGroups(new HashSet<>(defaultGroups));
+			}
+
 			return userDao.save(user);
 
 		} catch (Exception e) {

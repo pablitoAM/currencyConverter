@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Currency Converter - Pablo Avila Mesa</title>
+
+<!-- Bootstrap -->
+<link rel="stylesheet"
+	href="webjars/bootstrap/3.2.0/css/bootstrap.min.css" type="text/css" />
+<link rel="stylesheet" th:href="@{/css/style.css}" type="text/css" />
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/css/bootstrap-datepicker3.min.css"
+	type="text/css" />
+
+
+<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.2/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+<script src="webjars/jquery/2.1.1/jquery.min.js"></script>
+<script src="webjars/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+<body>
+
+	<!-- Nav -->
+	<nav th:replace="nav :: nav"></nav>
+	<!-- ./Nav -->
+
+	<!-- Container -->
+	<div class="container">
+
+
+		<div class="row">
+			<div class="col-lg-12 page-header">
+				<h1>
+					Currency Converter <small>Pablo Avila Mesa</small>
+				</h1>
+			</div>
+
+			<div th:if="${error}" class="col-lg-12 main">
+				<div class="alert alert-danger" th:text="${error}"></div>
+			</div>
+
+			<!-- Content -->
+			<div class="col-lg-12 main">
+
+				<!-- 				<div th:if="${session.user}" th:replace="main :: main"></div> -->
+				<div th:unless="${session.user}" th:replace="register :: register(${countries})"></div>
+
+			</div>
+		</div>
+	</div>
+	<!-- ./Container -->
+
+	<script type="text/javascript" th:inline="javascript">
+		//<![CDATA[
+			var user = [[${session.user}]];
+			if(user != undefined){
+				console.log(user);
+			} else {
+				console.log('User empty');
+			}
+		//]]>
+	</script>
+</body>
+
+</html>

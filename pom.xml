@@ -11,6 +11,9 @@
 		<module>converter-services</module>
 		<module>history-services</module>
 		<module>provider-services</module>
-		<module>user-services</module>
+		<module>user-services</module>		
+		<module>web-front</module>
+		<module>discovery-service</module>
+		<module>api-gateway</module>
 	</modules>
 </project>

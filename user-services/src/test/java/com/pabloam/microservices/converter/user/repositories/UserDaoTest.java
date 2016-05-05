@@ -22,7 +22,6 @@ import com.pabloam.microservices.converter.user.model.User;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ActiveProfiles({ "jpa, h2" })
 @SpringApplicationConfiguration(classes = DatabaseConfiguration.class)
-// @Transactional
 public class UserDaoTest {
 
 	@Autowired
@@ -53,7 +52,6 @@ public class UserDaoTest {
 		User actual = userDao.findByEmail(email);
 
 		assertEquals(expected, actual);
-
 	}
 
 	/**

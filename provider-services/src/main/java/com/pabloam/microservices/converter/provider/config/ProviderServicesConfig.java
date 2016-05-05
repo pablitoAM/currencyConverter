@@ -37,6 +37,7 @@ public class ProviderServicesConfig {
 
 	@PostConstruct
 	public void init() {
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		List<HandlerMethodReturnValueHandler> handlers = new ArrayList(requestMappingHandlerAdapter.getReturnValueHandlers());
 		handlers.add(0, observableReturnValueHandler());
 		requestMappingHandlerAdapter.setReturnValueHandlers(handlers);

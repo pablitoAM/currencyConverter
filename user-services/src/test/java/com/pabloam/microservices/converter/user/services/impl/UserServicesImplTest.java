@@ -2,6 +2,7 @@ package com.pabloam.microservices.converter.user.services.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -26,6 +27,7 @@ import com.pabloam.microservices.converter.user.exception.UserServicesException;
 import com.pabloam.microservices.converter.user.model.Group;
 import com.pabloam.microservices.converter.user.model.Permission;
 import com.pabloam.microservices.converter.user.model.User;
+import com.pabloam.microservices.converter.user.repositories.GroupDao;
 import com.pabloam.microservices.converter.user.repositories.UserDao;
 
 /**
@@ -37,6 +39,9 @@ public class UserServicesImplTest {
 
 	@Mock
 	private UserDao userDao;
+
+	@Mock
+	private GroupDao groupDao;
 
 	@InjectMocks
 	private UserServicesImpl userServicesImpl;
@@ -163,19 +168,34 @@ public class UserServicesImplTest {
 	 * {@link com.pabloam.microservices.converter.user.services.impl.UserServicesImpl#register(com.pabloam.microservices.converter.user.model.User)}
 	 * .
 	 */
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testRegister() throws Exception {
 		/*
 		 * Validate the user received parameters and verify the method save is
-		 * invoked in the dao
+		 * invoked in the userDao. Also validate the groupDao is invoked if
+		 * there are userGroups.
 		 */
 		String email = "test@test.com";
 		User user = getUser(email);
-		doReturn(user).when(this.userDao).save(user);
 
-		this.userServicesImpl.register(user);
+		List<Group> groupList = new ArrayList<Group>(2);
+		Group g1 = mock(Group.class);
+		Group g2 = mock(Group.class);
+		groupList.add(g1);
+		groupList.add(g2);
+
+		doReturn(user).when(this.userDao).save(user);
+		doReturn(groupList).when(this.groupDao).findMultipleByDescriptionList(any(List.class));
+
+		List<String> defaultGroupDescriptions = new ArrayList<String>(2);
+		defaultGroupDescriptions.add("g1");
+		defaultGroupDescriptions.add("g2");
+
+		this.userServicesImpl.register(user, defaultGroupDescriptions);
 		verify(this.userDao).save(user);
-		verifyNoMoreInteractions(this.userDao);
+		verify(this.groupDao).findMultipleByDescriptionList(any(List.class));
+		verifyNoMoreInteractions(this.userDao, this.groupDao);
 
 	}
 
@@ -195,7 +215,7 @@ public class UserServicesImplTest {
 		Long fromTheFutureDate = Instant.parse("2864-12-03T10:15:30.00Z").toEpochMilli();
 		user.setBirthDate(fromTheFutureDate);
 
-		this.userServicesImpl.register(user);
+		this.userServicesImpl.register(user, null);
 	}
 
 	/**
@@ -214,7 +234,7 @@ public class UserServicesImplTest {
 		Long tooOldDate = Instant.parse("1864-12-03T10:15:30.00Z").toEpochMilli();
 		user.setBirthDate(tooOldDate);
 
-		this.userServicesImpl.register(user);
+		this.userServicesImpl.register(user, null);
 	}
 
 	/**
@@ -231,7 +251,7 @@ public class UserServicesImplTest {
 		User user = getUser(email);
 		user.setPassword("");
 
-		this.userServicesImpl.register(user);
+		this.userServicesImpl.register(user, null);
 	}
 
 	/**
@@ -245,7 +265,7 @@ public class UserServicesImplTest {
 		 * Throws exception if the email is invalid
 		 */
 		String invalidMail = "user@localhost";
-		this.userServicesImpl.register(getUser(invalidMail));
+		this.userServicesImpl.register(getUser(invalidMail), null);
 
 	}
 

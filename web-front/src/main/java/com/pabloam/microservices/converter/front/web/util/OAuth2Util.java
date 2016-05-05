@@ -1,12 +1,14 @@
 package com.pabloam.microservices.converter.front.web.util;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
+import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsAccessTokenProvider;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordAccessTokenProvider;
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
@@ -48,7 +50,8 @@ public class OAuth2Util {
 	 * @return
 	 */
 	public OAuth2RestTemplate getOAuth2RestTemplateForClientCredentials() {
-		ResourceOwnerPasswordAccessTokenProvider provider = new ResourceOwnerPasswordAccessTokenProvider();
+
+		ClientCredentialsAccessTokenProvider provider = new ClientCredentialsAccessTokenProvider();
 		ClientCredentialsResourceDetails resource = getResource();
 
 		OAuth2AccessToken accessToken = provider.obtainAccessToken(resource, new DefaultAccessTokenRequest());
@@ -70,6 +73,7 @@ public class OAuth2Util {
 		resource.setClientId(cliendId);
 		resource.setClientSecret(clientSecret);
 		resource.setGrantType("client-credentials");
+		resource.setScope(Collections.singletonList("write"));
 
 		return resource;
 	}

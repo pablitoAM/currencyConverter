@@ -13,6 +13,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -42,7 +43,7 @@ public class FrontServicesImpl implements FrontServices {
 	@Autowired
 	private RestTemplate restTemplate;
 
-	@Value("${registerUserUrl:}")
+	@Value("${security.oauth2.client.registerUserUrl:}")
 	private String registerUserUrl;
 
 	/*
@@ -83,11 +84,13 @@ public class FrontServicesImpl implements FrontServices {
 		try {
 
 			OAuth2RestTemplate oAuth2RestTemplate = this.oauth2Util.getOAuth2RestTemplateForClientCredentials();
+//			oAuth2RestTemplate.getMessageConverters().add(new MappingJacksonHttpMessageConverter());
+//			oAuth2RestTemplate.getMessageConverters().add(new StringHttpMessageConverter());
 
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
 
-			HttpEntity<Map<String, String>> entity = new HttpEntity<Map<String, String>>(user, headers);
+			HttpEntity<String> entity = new HttpEntity<String>(user.toString(), headers);
 			ResponseEntity<Map> response = oAuth2RestTemplate.postForEntity(registerUserUrl, entity, Map.class);
 
 			if (response.getStatusCode().is4xxClientError() || response.getStatusCode().is5xxServerError()) {
@@ -95,7 +98,7 @@ public class FrontServicesImpl implements FrontServices {
 			}
 
 		} catch (Exception e) {
-			logger.error("Exception registering '%s'", user, e);
+			logger.error("Exception registering '{}'", user, e);
 			throw new FrontServicesException(String.format("Exception registering user: %s", e.getMessage()));
 		}
 	}

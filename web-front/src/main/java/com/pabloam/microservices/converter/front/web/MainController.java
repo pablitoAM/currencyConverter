@@ -1,17 +1,17 @@
 package com.pabloam.microservices.converter.front.web;
 
+import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,18 +27,33 @@ public class MainController {
 
 	@Autowired
 	private FrontServices frontServices;
+	
+	@Value("${default.currencies}")
+	private List<String> currencies;
 
 	/**
 	 * Processes the normal requests
 	 * 
 	 * @param user
 	 * @param request
+	 * @param request
 	 * @param response
 	 * @return
 	 */
-	@RequestMapping({ "/", "/index", "/login" })
-	public String index() {
-		return "index";
+	@RequestMapping({ "/", "/index" })
+	public ModelAndView home(HttpSession session) {
+		
+		ModelAndView mv = new ModelAndView("index");
+		
+		if(session.getAttribute("user") != null){
+			
+			mv.addObject("providers", frontServices.getActiveProviders());
+			mv.addObject("currencies", currencies);
+			
+			
+		}
+		
+		return mv;
 	}
 
 	/**
@@ -49,18 +64,16 @@ public class MainController {
 	 * @return
 	 */
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
-	public ModelAndView login(@RequestParam("f_un") String email, @RequestParam("f_pw") String password, HttpSession session) {
-
-		ModelAndView mv = new ModelAndView("index");
+	public String login(@RequestParam("f_un") String email, @RequestParam("f_pw") String password, HttpSession session, Model model) {
 		try {
 			OAuth2AccessToken accessToken = this.frontServices.getAccessToken(email, password);
 			storeInSession(email, accessToken, session);
 		} catch (Exception e) {
 			// Do nothing
-			mv.addObject("error", e.getMessage());
+			model.addAttribute("error", e.getMessage());
 			session.invalidate();
 		}
-		return mv;
+		return "index";
 	}
 
 	/**
@@ -72,7 +85,7 @@ public class MainController {
 	@RequestMapping(value = "/logout", method = RequestMethod.GET)
 	public String logout(HttpSession session) {
 		session.invalidate();
-		return "index";
+		return "redirect:index";
 	}
 
 	@RequestMapping(value = "/register", method = RequestMethod.POST)
@@ -107,14 +120,5 @@ public class MainController {
 	private void storeInSession(String email, OAuth2AccessToken accessToken, HttpSession session) {
 		session.setAttribute("user", email);
 		session.setAttribute("token", accessToken);
-	}
-
-	// Error Handling
-	@ExceptionHandler(Exception.class)
-	public ModelAndView handleRestException(HttpServletRequest request, Exception ex) {
-		logger.error(ex.getMessage(), ex);
-		ModelAndView mv = new ModelAndView("index");
-		mv.addObject("error", String.format("Exception in request: '%s' - message: '%s'", request.getRequestURL().toString(), ex.getMessage()));
-		return mv;
-	}
+	}	
 }

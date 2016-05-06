@@ -22,10 +22,10 @@ import com.pabloam.microservices.converter.provider.services.ProviderServices;
 import rx.Observable;
 
 @RestController
-public class QueryController {
+public class ProviderController {
 
 	// The logger
-	final Logger logger = (Logger) LoggerFactory.getLogger(QueryController.class);
+	final Logger logger = (Logger) LoggerFactory.getLogger(ProviderController.class);
 
 	/**
 	 * The provider services implemented an exchange provider
@@ -39,8 +39,8 @@ public class QueryController {
 	 * @return
 	 */
 	@RequestMapping(value = "/provider/getName", method = RequestMethod.GET)
-	public Observable<String> getName() {
-		return Observable.just(providerServices.getProviderName());
+	public String getName() {
+		return providerServices.getProviderName();
 	}
 
 	/**
@@ -49,8 +49,8 @@ public class QueryController {
 	 * @return
 	 */
 	@RequestMapping(value = "/provider/getRefreshInterval", method = RequestMethod.GET)
-	public Observable<RefreshIntervalEnum> getRefreshInterval() {
-		return Observable.just(providerServices.getRefreshInterval());
+	public RefreshIntervalEnum getRefreshInterval() {
+		return providerServices.getRefreshInterval();
 	}
 
 	/**
@@ -62,8 +62,8 @@ public class QueryController {
 	 * @return
 	 */
 	@RequestMapping(value = "provider/getCurrent/{sourceCurrency}/{expectedCurrencies}")
-	public Observable<ConvertedResponse> getCurrentRates(@PathVariable String sourceCurrency, @PathVariable String[] expectedCurrencies) {
-		return Observable.just(providerServices.getCurrentRates(sourceCurrency, expectedCurrencies));
+	public ConvertedResponse getCurrentRates(@PathVariable String sourceCurrency, @PathVariable String[] expectedCurrencies) {
+		return providerServices.getCurrentRates(sourceCurrency, expectedCurrencies);
 	}
 
 	/**
@@ -76,9 +76,9 @@ public class QueryController {
 	 * @return
 	 */
 	@RequestMapping(value = "provider/getHistorical/{date}/{sourceCurrency}/{expectedCurrencies}")
-	public Observable<ConvertedResponse> getCurrentRates(@PathVariable String date, @PathVariable String sourceCurrency,
+	public ConvertedResponse getCurrentRates(@PathVariable String date, @PathVariable String sourceCurrency,
 			@PathVariable String[] expectedCurrencies) {
-		return Observable.just(providerServices.getHistoricalRates(sourceCurrency, date, expectedCurrencies));
+		return providerServices.getHistoricalRates(sourceCurrency, date, expectedCurrencies);
 	}
 
 	// Error Handling

@@ -3,19 +3,26 @@ package com.pabloam.microservices.converter.user.services.web;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.AbstractMap;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.pabloam.microservices.converter.common.DefaultResponse;
+import com.pabloam.microservices.converter.common.ResponseStatus;
 import com.pabloam.microservices.converter.user.model.User;
 import com.pabloam.microservices.converter.user.services.UserServices;
 
@@ -49,16 +56,16 @@ public class UserController {
 	 * @return
 	 */
 	@RequestMapping(value = "/register", method = RequestMethod.POST)
-	public Map.Entry<String, String> register(@RequestBody User data) {
+	public DefaultResponse register(@RequestBody Map<String, Object> data) {
 
-		Map.Entry<String, String> result = null;
+		DefaultResponse result = new DefaultResponse();
 		try {
-			User user = userServices.register(data, defaultUserGroups);
-			result = new AbstractMap.SimpleEntry<String, String>("success", user.getEmail());
+			User user = userServices.register(processData(data), defaultUserGroups);
+			result = result.setStatus(ResponseStatus.SUCCESS).setPayload(user.getEmail());
 
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
-			result = new AbstractMap.SimpleEntry<String, String>("success", e.getMessage());
+			result = result.setStatus(ResponseStatus.ERROR).setPayload(e.getMessage());
 		}
 		return result;
 	}
@@ -74,13 +81,25 @@ public class UserController {
 		user.setEmail((String) data.get("email"));
 		user.setPassword((String) data.get("password"));
 
-		LocalDate date = (LocalDate) data.get("birthdate");
-		if (date != null) {
-			user.setBirthDate(date.atStartOfDay(ZoneId.systemDefault()).toEpochSecond());
+		String birthDateString = (String) data.get("birthDate");
+
+		if (StringUtils.hasText(birthDateString)) {
+			LocalDate date = LocalDate.parse(birthDateString, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+			user.setBirthDate(date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli());
 		}
+
 		user.setAddress((String) data.get("address"));
 		user.setZipCode((String) data.get("zipCode"));
+		user.setCountry((String) data.get("country"));
+
 		return user;
+	}
+
+	// Error Handling
+	@ExceptionHandler(Exception.class)
+	public @ResponseBody String handleRestException(HttpServletRequest request, Exception ex) {
+		logger.error(ex.getMessage(), ex);
+		return String.format("Exception in request: '%s' - message: '%s'", request.getRequestURL().toString(), ex.getMessage());
 	}
 
 }

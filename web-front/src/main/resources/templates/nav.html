@@ -23,17 +23,14 @@
 		</th:block>
 		<div class="pull-right" th:if="${session.user}">
 			<img th:src="@{/images/logged.png}" alt="icon" class="img-circle" />
-			<a th:href="@{/logout}" class="btn btn-default navbar-btn">Sign
-				Out</a>
+			<span class="label label-default" th:text="${session.user}"></span> <a
+				th:href="@{/logout}" class="btn btn-default navbar-btn">Sign Out</a>
 		</div>
 	</div>
 
 	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[		
-			
-			
-		           
-		           
+
 		//]]>
 	</script>
 </nav>

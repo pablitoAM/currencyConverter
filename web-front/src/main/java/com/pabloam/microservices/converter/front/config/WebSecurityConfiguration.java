@@ -11,14 +11,18 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 	public void configure(HttpSecurity http) throws Exception {
 		//@formatter:off
 		http
-			.antMatcher("/**")
-				.authorizeRequests()
-			.antMatchers("/", "/index", "/login", "/logout", "/register", "/webjars/**", "/auth/**", "/css/**", "/json/**")
-				.permitAll()
-			.anyRequest()
-				.authenticated()
-			.and()
-				.csrf().disable();				
+		.authorizeRequests()
+			.antMatchers("/", "/index", "/login", "/register", "/logout", "/auth/**", "/webjars/**", "/css/**", "/json/**").permitAll()			
+			.anyRequest().authenticated()
+//        .and()
+//        .formLogin()
+//            .loginPage("/") 
+//            .usernameParameter("f_un")
+//            .passwordParameter("f_pw") .loginProcessingUrl("/login").defaultSuccessUrl("/")        
+            .and()
+            	.exceptionHandling().accessDeniedPage("/index")
+            .and().csrf().disable();                 
+            
 		//@formatter:on
 	}
 }

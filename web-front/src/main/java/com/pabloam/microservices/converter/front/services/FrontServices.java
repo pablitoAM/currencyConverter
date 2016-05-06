@@ -1,5 +1,6 @@
 package com.pabloam.microservices.converter.front.services;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -29,5 +30,12 @@ public interface FrontServices {
 	 * @throws FrontServicesException
 	 */
 	public void register(Map<String, String> user) throws FrontServicesException;
+
+	/**
+	 * Returns the list of provider-services registered in the app
+	 * 
+	 * @return
+	 */
+	public List<String> getActiveProviders();
 
 }

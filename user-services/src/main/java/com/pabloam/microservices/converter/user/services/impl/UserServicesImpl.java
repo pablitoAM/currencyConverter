@@ -88,7 +88,7 @@ public class UserServicesImpl implements UserServices {
 
 		} catch (Exception e) {
 			logger.error("Exception registering user with the following values: '{}'", user, e);
-			throw new UserServicesException(String.format("Exception registering user: %s", e.getMessage()));
+			throw new UserServicesException(e.getMessage());
 		}
 	}
 

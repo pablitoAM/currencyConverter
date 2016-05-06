@@ -1,0 +1,107 @@
+<th:block th:fragment="main(providers, currencies)">
+
+	<div class="panel panel-default">
+		<div class="panel-heading">Currency Rates Panel</div>
+		<div class="panel-body">
+
+			<div class="form">
+
+				<!-- Provider -->
+				<div class="form-group">
+					<label for="provider" class="control-label">Provider</label> <select
+						class="form-control" name="provider">
+						<option th:each="provider : ${providers}" th:text="provider"></option>
+					</select>
+				</div>
+
+				<!-- Source Currency -->
+				<div class="form-group">
+					<label for="source" class="control-label">Source Currency</label> <select
+						class="form-control" name="source">
+						<option th:each="currency : ${currencies}" th:text="currency"></option>
+					</select>
+				</div>
+
+				<!-- Current or Historical -->
+				<div class="form-group">
+					<label for="source" class="control-label">Source Currency</label>
+					<div class="input-group">
+						<div class="input-group">
+							<span class="input-group-addon"> <input type="checkbox" name="historical"> Historical
+							</span> <input type="text" class="form-control" name="date">
+						</div>
+						<!-- /input-group -->
+					</div>
+
+					<div class="form-group hidden">
+						<label for="source" class="control-label">Source Currency</label>
+						<div class="input-group date" data-name="date">
+							<input type="text" class="form-control" name="date"
+								placeholder="yyyy-mm-dd" />
+							<div class="input-group-addon">
+								<span class="glyphicon glyphicon-th"></span>
+							</div>
+						</div>
+					</div>
+
+				</div>
+				<div class="form-horizontal" data-name="boxes"></div>
+
+			</div>
+		</div>
+		<script type="text/javascript" th:inline="javascript">
+		//<![CDATA[
+		           
+		var currencies = [[${currencies}]];
+		
+		           
+		$(document).ready(function(){
+			
+			initCheckbox();
+			
+			
+		});
+		
+		function initCheckbox(){
+			
+			$('input[name="current"]').click(function() {
+				var field = $('input[name="date"]');
+				if(this.checked){
+					field.prop('disabled', false);
+					field.attr('placeholder', "yyyy-mm-dd");
+				} else {
+					field.prop('disabled', true);
+					field.val('');
+				}			    
+			});
+			
+		}
+		
+		function refreshBoxes(source, currencies, result){			
+			var div = $('div[data-name="boxes"]');
+			div.empty();
+			
+			$.each(currencies, function(idx, obj){
+				
+				if(obj != source){					
+					var value = result[obj] || '';
+					var box = paintBox(obj, value);
+					div.append(box);					
+				}				
+			});			
+		}
+		
+		function paintBox(currency, value){
+			var html = '';
+			html += '<div class="form-group">';
+			html += '<label for="c" class="col-sm-3 control-label">'+currency+'</label>';
+			html += '<span class="form-control">'+value+'</span>';
+			html += '</div>';		
+			
+			return html;
+		}
+
+
+		//]]>
+	</script>
+</th:block>

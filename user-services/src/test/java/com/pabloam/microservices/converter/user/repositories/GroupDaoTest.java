@@ -10,6 +10,8 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +30,7 @@ import com.pabloam.microservices.converter.user.model.Group;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ActiveProfiles({ "jpa, h2" })
 @SpringApplicationConfiguration(classes = DatabaseConfiguration.class)
+@Transactional
 public class GroupDaoTest {
 
 	@Autowired

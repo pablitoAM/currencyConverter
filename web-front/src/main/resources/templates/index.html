@@ -25,6 +25,7 @@
 <script src="webjars/jquery/2.1.1/jquery.min.js"></script>
 <script src="webjars/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 
+
 <body>
 
 	<!-- Nav -->
@@ -48,11 +49,14 @@
 
 			<!-- Content -->
 			<div class="col-lg-12 main">
-
-				<!-- 				<div th:if="${session.user}" th:replace="main :: main"></div> -->
-				<div th:unless="${session.user}" th:replace="register :: register(${countries})"></div>
-
+				<div th:if="${session.user}">
+					<div th:replace="main :: main(${providers}, ${currencies})"></div>
+				</div>
+				<div th:unless="${session.user}">
+					<div th:replace="register :: register(${countries})"></div>
+				</div>
 			</div>
+
 		</div>
 	</div>
 	<!-- ./Container -->
@@ -64,6 +68,7 @@
 				console.log(user);
 			} else {
 				console.log('User empty');
+// 				window.location.href = [[@{/auth/login}]];
 			}
 		//]]>
 	</script>

@@ -27,8 +27,9 @@
 					<label for="source" class="control-label">Source Currency</label>
 					<div class="input-group">
 						<div class="input-group">
-							<span class="input-group-addon"> <input type="checkbox" name="historical"> Historical
-							</span> <input type="text" class="form-control" name="date">
+							<span class="input-group-addon"> <input type="checkbox"
+								name="historical" /> Historical
+							</span> <input type="text" class="form-control" name="date" />
 						</div>
 						<!-- /input-group -->
 					</div>
@@ -45,11 +46,13 @@
 					</div>
 
 				</div>
+				<hr />
 				<div class="form-horizontal" data-name="boxes"></div>
 
 			</div>
 		</div>
-		<script type="text/javascript" th:inline="javascript">
+	</div>
+	<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
 		           
 		var currencies = [[${currencies}]];
@@ -83,7 +86,7 @@
 			
 			$.each(currencies, function(idx, obj){
 				
-				if(obj != source){					
+				if(obj != source){
 					var value = result[obj] || '';
 					var box = paintBox(obj, value);
 					div.append(box);					

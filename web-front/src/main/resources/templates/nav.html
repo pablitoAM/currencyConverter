@@ -1,30 +1,14 @@
 <!-- Navbar -->
 <nav class="navbar navbar-default navbar-fixed-top" role="navigation"
-	th:fragment="nav">
+	th:fragment="nav(user)">
 	<div class="container-fluid">
 		<div class="pull-left">
 			<a class="navbar-brand padding-15" th:href="@{/}">Zoo</a>
-		</div>
-		<th:block th:unless="${session.user}">
-			<div class="navbar-form navbar-right">
-				<form th:action="@{/login}" method="post">
-					<div class="form-group">
-						<input type="text" class="form-control max-width-100 required"
-							placeholder="Username" name="f_un" />
-					</div>
-					<div class="form-group">
-						<input type="password" class="form-control max-width-100 required"
-							placeholder="Password" name="f_pw" />
-					</div>
-					<button type="submit" class="btn btn-primary" data-action="signIn">Sign
-						in</button>
-				</form>
-			</div>
-		</th:block>
-		<div class="pull-right" th:if="${session.user}">
+		</div>		
+		<div class="pull-right" th:if="${user}">
 			<img th:src="@{/images/logged.png}" alt="icon" class="img-circle" />
 			<span class="label label-default" th:text="${session.user}"></span> <a
-				th:href="@{/logout}" class="btn btn-default navbar-btn">Sign Out</a>
+				th:href="@{/auth/logout}" class="btn btn-default navbar-btn">Sign Out</a>
 		</div>
 	</div>
 

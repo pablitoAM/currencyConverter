@@ -22,5 +22,4 @@ public class GlobalExceptionHandler {
 		mv.addObject("error", String.format("Exception in request: '%s' - message: '%s'", request.getRequestURL().toString(), ex.getMessage()));
 		return mv;
 	}
-
 }

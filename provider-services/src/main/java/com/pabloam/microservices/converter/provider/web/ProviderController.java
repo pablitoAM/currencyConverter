@@ -5,23 +5,20 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.pabloam.microservices.converter.common.ConvertedResponse;
 import com.pabloam.microservices.converter.common.RefreshIntervalEnum;
-import com.pabloam.microservices.converter.common.exceptions.JsonException;
 import com.pabloam.microservices.converter.provider.services.ProviderServices;
 
-import rx.Observable;
-
 @RestController
+@EnableResourceServer
 public class ProviderController {
 
 	// The logger
@@ -76,8 +73,7 @@ public class ProviderController {
 	 * @return
 	 */
 	@RequestMapping(value = "provider/getHistorical/{date}/{sourceCurrency}/{expectedCurrencies}")
-	public ConvertedResponse getCurrentRates(@PathVariable String date, @PathVariable String sourceCurrency,
-			@PathVariable String[] expectedCurrencies) {
+	public ConvertedResponse getCurrentRates(@PathVariable String date, @PathVariable String sourceCurrency, @PathVariable String[] expectedCurrencies) {
 		return providerServices.getHistoricalRates(sourceCurrency, date, expectedCurrencies);
 	}
 

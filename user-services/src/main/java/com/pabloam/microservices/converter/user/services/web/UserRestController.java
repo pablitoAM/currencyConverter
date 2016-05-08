@@ -1,42 +1,36 @@
 package com.pabloam.microservices.converter.user.services.web;
 
-import java.security.Principal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.pabloam.microservices.converter.common.DefaultResponse;
-import com.pabloam.microservices.converter.common.ResponseStatus;
 import com.pabloam.microservices.converter.user.model.User;
-import com.pabloam.microservices.converter.user.services.UserServices;
 
 @RestController
-public class UserController {
+public class UserRestController {
 
 	// The logger
-	final Logger logger = (Logger) LoggerFactory.getLogger(UserController.class);
+	final Logger logger = (Logger) LoggerFactory.getLogger(UserRestController.class);
 
-	@Autowired
-	private UserServices userServices;
+	// @Autowired
+	// private UserServices userServices;
 
-	@Value("#{'${default.user.groups}'.split(',')}")
-	private List<String> defaultUserGroups;
+	// @Value("#{'${default.user.groups}'.split(',')}")
+	// private List<String> defaultUserGroups;
 
 	/**
 	 * Returns the principal
@@ -45,8 +39,11 @@ public class UserController {
 	 * @return
 	 */
 	@RequestMapping("/user")
-	public Principal user(Principal user) {
-		return user;
+	public Map<String, Object> user(Authentication user) {
+		Map<String, Object> result = new HashMap<>(2);
+		result.put("email", user.getName());
+		result.put("authorities", user.getAuthorities().stream().map(a -> a.getAuthority().toString()).collect(Collectors.toList()));
+		return result;
 	}
 
 	/**
@@ -55,20 +52,22 @@ public class UserController {
 	 * @param user
 	 * @return
 	 */
-	@RequestMapping(value = "/register", method = RequestMethod.POST)
-	public DefaultResponse register(@RequestBody Map<String, Object> data) {
-
-		DefaultResponse result = new DefaultResponse();
-		try {
-			User user = userServices.register(processData(data), defaultUserGroups);
-			result = result.setStatus(ResponseStatus.SUCCESS).setPayload(user.getEmail());
-
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			result = result.setStatus(ResponseStatus.ERROR).setPayload(e.getMessage());
-		}
-		return result;
-	}
+	// @RequestMapping(value = "/register", method = RequestMethod.POST)
+	// public DefaultResponse register(@RequestBody Map<String, Object> data) {
+	//
+	// DefaultResponse result = new DefaultResponse();
+	// try {
+	// User user = userServices.register(processData(data), defaultUserGroups);
+	// result =
+	// result.setStatus(ResponseStatus.SUCCESS).setPayload(user.getEmail());
+	//
+	// } catch (Exception e) {
+	// logger.error(e.getMessage(), e);
+	// result =
+	// result.setStatus(ResponseStatus.ERROR).setPayload(e.getMessage());
+	// }
+	// return result;
+	// }
 
 	/**
 	 * Sets the data into a User pojo

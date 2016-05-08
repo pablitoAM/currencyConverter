@@ -1,17 +1,18 @@
 package com.pabloam.microservices.converter.front.web.util;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
+import org.springframework.security.oauth2.client.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
-import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsAccessTokenProvider;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordAccessTokenProvider;
 import org.springframework.security.oauth2.client.token.grant.password.ResourceOwnerPasswordResourceDetails;
+import org.springframework.security.oauth2.common.AuthenticationScheme;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.stereotype.Component;
 
@@ -21,11 +22,14 @@ public class OAuth2Util {
 	@Value("${security.oauth2.client.accessTokenUri:http://localhost:9999/auth/oauth/token}")
 	private String tokenUrl;
 
-	@Value("${security.oauth2.client.clientId:zoo}")
+	@Value("${security.oauth2.client.clientId:}")
 	private String cliendId;
 
-	@Value("${security.oauth2.client.clientSecret:zoo}")
+	@Value("${security.oauth2.client.clientSecret:}")
 	private String clientSecret;
+
+	@Autowired
+	private OAuth2ClientContext clientContext;
 
 	/**
 	 * Gets an OAuth2RestTemplate for the given user credentials
@@ -35,24 +39,9 @@ public class OAuth2Util {
 	 * @return
 	 */
 	public OAuth2RestTemplate getOAuth2RestTemplateForPassword(String email, String password) {
+
 		ResourceOwnerPasswordAccessTokenProvider provider = new ResourceOwnerPasswordAccessTokenProvider();
-		ResourceOwnerPasswordResourceDetails resource = getResource(email, password);
-
-		OAuth2AccessToken accessToken = provider.obtainAccessToken(resource, new DefaultAccessTokenRequest());
-		OAuth2RestTemplate restTemplate = new OAuth2RestTemplate(resource, new DefaultOAuth2ClientContext(accessToken));
-
-		return restTemplate;
-	}
-
-	/**
-	 * Gets an access token for the given client. To emulate an anonymous user
-	 * 
-	 * @return
-	 */
-	public OAuth2RestTemplate getOAuth2RestTemplateForClientCredentials() {
-
-		ClientCredentialsAccessTokenProvider provider = new ClientCredentialsAccessTokenProvider();
-		ClientCredentialsResourceDetails resource = getResource();
+		ResourceOwnerPasswordResourceDetails resource = getUserPasswordResource(email, password);
 
 		OAuth2AccessToken accessToken = provider.obtainAccessToken(resource, new DefaultAccessTokenRequest());
 		OAuth2RestTemplate restTemplate = new OAuth2RestTemplate(resource, new DefaultOAuth2ClientContext(accessToken));
@@ -84,21 +73,23 @@ public class OAuth2Util {
 	 * 
 	 * @return
 	 */
-	private ResourceOwnerPasswordResourceDetails getResource(String email, String password) {
+	private ResourceOwnerPasswordResourceDetails getUserPasswordResource(String email, String password) {
 		ResourceOwnerPasswordResourceDetails resource = new ResourceOwnerPasswordResourceDetails();
-
-		List<String> scopes = new ArrayList<String>(2);
-		scopes.add("write");
-		scopes.add("read");
 		resource.setAccessTokenUri(tokenUrl);
 		resource.setClientId(cliendId);
 		resource.setClientSecret(clientSecret);
 		resource.setGrantType("password");
-		resource.setScope(scopes);
+		resource.setScope(Arrays.asList("read", "write"));
+//		resource.setClientAuthenticationScheme(AuthenticationScheme.form);
 
 		resource.setUsername(email);
 		resource.setPassword(password);
 
 		return resource;
+	}
+
+	public OAuth2RestTemplate getOAuth2RestTemplateForClientCredentials() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

@@ -63,55 +63,55 @@ public class FrontServicesImplTest {
 	}
 
 	/**
-	 * Test method for
-	 * {@link com.pabloam.microservices.converter.front.services.impl.FrontServicesImpl#getAccessToken(java.lang.String, java.lang.String)}
-	 * .
-	 */
-	@Test
-	public void testGetAccessToken() throws Exception {
-		/*
-		 * Verify the credentials are not null nor empty and validate oauthUtil
-		 * is invoked.
+		 * Test method for
+		 * {@link com.pabloam.microservices.converter.front.services.impl.FrontServicesImpl#getOAuth2RestTemplateForUserPassword(java.lang.String, java.lang.String)}
+		 * .
 		 */
-		String email = "asdw";
-		String password = "test";
-		OAuth2RestTemplate oAuth2RestTemplate = mock(OAuth2RestTemplate.class);
-
-		doReturn(oAuth2RestTemplate).when(this.oauth2Util).getOAuth2RestTemplateForPassword(email, password);
-		doReturn(null).when(oAuth2RestTemplate).getAccessToken();
-
-		this.frontServicesImpl.getAccessToken(email, password);
-		verify(this.oauth2Util).getOAuth2RestTemplateForPassword(email, password);
-		verifyNoMoreInteractions(this.oauth2Util);
-
-	}
+		@Test
+		public void testGetOAuth2RestTemplateForUserPassword() throws Exception {
+			/*
+			 * Verify the credentials are not null nor empty and validate oauthUtil
+			 * is invoked.
+			 */
+			String email = "asdw";
+			String password = "test";
+			OAuth2RestTemplate oAuth2RestTemplate = mock(OAuth2RestTemplate.class);
+	
+			doReturn(oAuth2RestTemplate).when(this.oauth2Util).getOAuth2RestTemplateForPassword(email, password);
+			doReturn(null).when(oAuth2RestTemplate).getAccessToken();
+	
+			this.frontServicesImpl.getOAuth2RestTemplateForUserPassword(email, password);
+			verify(this.oauth2Util).getOAuth2RestTemplateForPassword(email, password);
+			verifyNoMoreInteractions(this.oauth2Util);
+	
+		}
 
 	/**
-	 * Test method for
-	 * {@link com.pabloam.microservices.converter.front.services.impl.FrontServicesImpl#getAccessToken(java.lang.String, java.lang.String)}
-	 * .
-	 */
-	@Test(expected = BadCredentialsException.class)
-	public void testGetAccessTokenWrongPassword() throws Exception {
-		/*
-		 * Throws exception when the password is null or empty
+		 * Test method for
+		 * {@link com.pabloam.microservices.converter.front.services.impl.FrontServicesImpl#getOAuth2RestTemplateForUserPassword(java.lang.String, java.lang.String)}
+		 * .
 		 */
-		this.frontServicesImpl.getAccessToken("emai", null);
-
-	}
+		@Test(expected = BadCredentialsException.class)
+		public void testGetOAuth2RestTemplateForUserPasswordWrongPassword() throws Exception {
+			/*
+			 * Throws exception when the password is null or empty
+			 */
+			this.frontServicesImpl.getOAuth2RestTemplateForUserPassword("emai", null);
+	
+		}
 
 	/**
-	 * Test method for
-	 * {@link com.pabloam.microservices.converter.front.services.impl.FrontServicesImpl#getAccessToken(java.lang.String, java.lang.String)}
-	 * .
-	 */
-	@Test(expected = BadCredentialsException.class)
-	public void testGetAccessTokenWrongEmail() throws Exception {
-		/*
-		 * Throws exception when the email is null or empty
+		 * Test method for
+		 * {@link com.pabloam.microservices.converter.front.services.impl.FrontServicesImpl#getOAuth2RestTemplateForUserPassword(java.lang.String, java.lang.String)}
+		 * .
 		 */
-		this.frontServicesImpl.getAccessToken(null, "password");
-	}
+		@Test(expected = BadCredentialsException.class)
+		public void testGetOAuth2RestTemplateForUserPasswordWrongEmail() throws Exception {
+			/*
+			 * Throws exception when the email is null or empty
+			 */
+			this.frontServicesImpl.getOAuth2RestTemplateForUserPassword(null, "password");
+		}
 
 	/**
 	 * Test method for

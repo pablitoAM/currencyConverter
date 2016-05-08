@@ -3,15 +3,14 @@
 	<script
 		src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/js/bootstrap-datepicker.min.js"></script>
 
-	<div class="panel panel-default">
+	<div class="panel panel-default hidden" data-name="register">
 
 		<div class="panel-heading">
 			<h3 class="panel-title">Register</h3>
 		</div>
-		<form th:action="@{/register}" method="post">
+		<form th:action="@{/auth/register}" method="post">
 			<div class="panel-body">
-				<div class="alert alert-danger hidden" data-name="notifications"></div>
-
+			
 				<div class="form-horizontal" data-name="register-form">
 					<div class="form-group">
 						<label for="email" class="col-sm-3 control-label">Email</label>
@@ -32,8 +31,8 @@
 							Date</label>
 						<div class="col-sm-9">
 							<div class="input-group date" data-name="date">
-								<input type="text" class="form-control"
-									name="birthDate" placeholder="dd/mm/yyyy" />
+								<input type="text" class="form-control" name="birthDate"
+									placeholder="dd/mm/yyyy" />
 								<div class="input-group-addon">
 									<span class="glyphicon glyphicon-th"></span>
 								</div>

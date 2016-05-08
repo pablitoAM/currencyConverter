@@ -52,11 +52,6 @@
 				<div th:if="${user}">
 					<div th:replace="main :: main(${providers}, ${currencies})"></div>
 				</div>
-
-				<div th:unless="${user}">
-					<div th:replace="login :: login"></div>
-					<div th:replace="register :: register(${countries})"></div>
-				</div>
 			</div>
 		</div>
 	</div>

@@ -1,4 +1,4 @@
-<th:block th:fragment="register(countries)">
+<th:block th:fragment="main(providers, currencies)">
 
 	<script
 		src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/js/bootstrap-datepicker.min.js"></script>
@@ -6,73 +6,23 @@
 	<div class="panel panel-default">
 
 		<div class="panel-heading">
-			<h3 class="panel-title">Register</h3>
+			<h3 class="panel-title">Dashboard</h3>
 		</div>
-		<form th:action="@{/register}" method="post">
-			<div class="panel-body">
-				<div class="alert alert-danger hidden" data-name="notifications"></div>
 
-				<div class="form-horizontal" data-name="register-form">
-					<div class="form-group">
-						<label for="email" class="col-sm-3 control-label">Email</label>
-						<div class="col-sm-9">
-							<input type="email" class="form-control" name="email"
-								placeholder="Email" />
-						</div>
-					</div>
-					<div class="form-group">
-						<label for="password" class="col-sm-3 control-label">Password</label>
-						<div class="col-sm-9">
-							<input type="password" class="form-control" name="password"
-								placeholder="password" />
-						</div>
-					</div>
-					<div class="form-group">
-						<label for="birthdate" class="col-sm-3 control-label">Birth
-							Date</label>
-						<div class="col-sm-9">
-							<div class="input-group date" data-name="date">
-								<input type="text" class="form-control"
-									name="birthDate" placeholder="dd/mm/yyyy" />
-								<div class="input-group-addon">
-									<span class="glyphicon glyphicon-th"></span>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="form-group">
-						<label for="address" class="col-sm-3 control-label">Address</label>
-						<div class="col-sm-9">
-							<input type="text" class="form-control" name="address"
-								placeholder="Address" />
-						</div>
-					</div>
-					<div class="form-group">
-						<label for="zip" class="col-sm-3 control-label">Zip Code</label>
-						<div class="col-sm-9">
-							<input type="text" class="form-control" name="zipCode"
-								placeholder="Zip Code" />
-						</div>
-					</div>
+		<div class="panel-body">
 
-					<div class="form-group">
-						<label for="country" class="col-sm-3 control-label">Country</label>
-						<div class="col-sm-9">
-							<select class="form-control" name="country">
-								<option disabled="disabled" selected="selected" value="">Select
-									Country</option>
-							</select>
-						</div>
-					</div>
+			<div class="row">
+				<div class="col-md-6">
+					<div
+						th:replace="query-component :: main(${providers}, ${currencies})"></div>
 				</div>
+				<div class="col-md-6">
+					<!-- 					<div th:replace="history-component :: main()"></div> -->
+				</div>
+			</div>
 
-			</div>
-			<div class="panel-footer">
-				<button class="btn btn-primary pull-right" type="submit"
-					data-action="register">Register</button>
-				<div class="clearfix"></div>
-			</div>
-		</form>
+		</div>
+
 	</div>
 
 
@@ -80,101 +30,7 @@
 		//<![CDATA[				
 		$(document).ready(function(){
 			
-			initDatePicker();			
-				loadCountries();			
-				
-				
-				$('button[data-action="register"]').on('click',function(e) {				    
-				    if(!validate()){
-				      e.preventDefault(); //prevent the default action
-				    }
-				});
-				
-// 				$('button[data-action="register"]').on('click', function(){					
-// 					var $btn = $(this);
-// 					if(validate()){
-// 						$btn.prop('disabled', true);
-						
-// 						var data = getData();
-						
-// 						$.ajax({
-// 							type: 'POST',
-// 							url: [[@{/auth/register.json}]],
-// 							data: JSON.stringify(data),
-// 							contentType: 'application/json',
-// 							dataType: 'json'
-							
-// 						}).always(function(){
-// 							$btn.prop('disabled', false);	
-// 						}).done(function(result){
-// 							if(result.success){
-// 								// Do something
-// 							} else {
-// 								showError(result.error);								
-// 							}							
-// 						}).fail(function(error){
-// 							console.log(error);
-// 						});
-// 					}					
-// 				});				
-				
-		});
-		
-		function validate(){			
-			var hasErrors = false;
-			$('div[data-name="register-form"]').find(':input').each(function(idx, obj){
-				if(!$(obj).val()){
-					$(obj).closest('.form-group').addClass('has-error').removeClass('has-success');
-					hasErrors = true;
-				} else {
-					$(obj).closest('.form-group').addClass('has-success').removeClass('has-error');
-				}
-			});	
-			var select = $('select[name="country"]');
-				if(!select.val()){
-					select.closest('.form-group').addClass('has-error').removeClass('has-success');
-					hasErrors = true;
-				} else {
-					select.closest('.form-group').addClass('has-success').removeClass('has-error');
-				}
-			return !hasErrors;
-		}
-		
-		function showError(error){			
-			$('div[data-name="data-name="notifications""]').empty().text(error).removeClass("hidden");			
-		}
-		
-		function initDatePicker(){
-			$('div[data-name="date"]').datepicker({
-				format: 'dd/mm/yyyy',
-				orientation: "bottom auto",
-				defaultViewDate: { year: 1984, month: 8, day: 6 },
-				autoclose: true
-			});
-		}
-		
-// 		function getData(){
 			
-// 			var data = {};
-			
-// 			$('div[data-name="register-form"]').find(':input').each(function(idx, obj){				
-// 				data[$(obj).attr('data-name')] = $(obj).val();
-// 			});
-			
-// 			data['country'] = $('select[data-name="country"]').val();
-			
-// 			return data;
-// 		}
-		
-		function loadCountries(){
-			$.getJSON([[@{/json/countries.json}]], function(data){
-				if(data != undefined){
-					var select = $('select[name="country"]');
-					$.each(data, function(idx, obj){
-						select.append('<option>'+obj.name+'</option>');
-					})
-				}
-			});
 		}
 		//]]>
 	</script>

@@ -20,11 +20,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.client.RestTemplate;
 
 import com.pabloam.microservices.converter.common.DefaultResponse;
 import com.pabloam.microservices.converter.common.ResponseStatus;
@@ -46,23 +44,20 @@ public class FrontServicesImpl implements FrontServices {
 	@Autowired
 	private OAuth2Util oauth2Util;
 
-	@Autowired
-	private RestTemplate restTemplate;
-
 	@Value("${security.oauth2.client.registerUserUrl:}")
 	private String registerUserUrl;
 
-	@Value("${security.oauth2.client.clientId}")
+	@Value("${security.oauth2.client.clientId:}")
 	private String clientId;
 
-	@Value("${security.oauth2.client.clientSecret}")
+	@Value("${security.oauth2.client.clientSecret:}")
 	private String clientSecret;
 
 	@Value("${provider.prefix:PROVIDER-}")
 	protected String providerPrefix;
 
 	@Autowired
-    private DiscoveryClient discoveryClient;
+	private DiscoveryClient discoveryClient;
 
 	/*
 	 * (non-Javadoc)
@@ -71,18 +66,17 @@ public class FrontServicesImpl implements FrontServices {
 	 * getAccessToken(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public OAuth2AccessToken getAccessToken(String email, String password) throws FrontServicesException {
+	public OAuth2RestTemplate getOAuth2RestTemplateForUserPassword(String email, String password) throws FrontServicesException {
 
 		try {
 			validateCredentials(email, password);
 			OAuth2RestTemplate oAuth2RestTemplate = oauth2Util.getOAuth2RestTemplateForPassword(email, password);
-			return oAuth2RestTemplate.getAccessToken();
+			return oAuth2RestTemplate;
 
 		} catch (IllegalArgumentException | OAuth2AccessDeniedException e) {
 			logger.error("Exception getting the access token for: '{}:{}'", email, password, e);
 			throw new BadCredentialsException(String.format("Exception getting the access token %s", e.getMessage()));
 		}
-
 	}
 
 	/*

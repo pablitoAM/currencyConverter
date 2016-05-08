@@ -3,23 +3,23 @@ package com.pabloam.microservices.converter.front.services;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 
 import com.pabloam.microservices.converter.front.exceptions.FrontServicesException;
 
 public interface FrontServices {
 
 	/**
-	 * Tries to get an access token for the current user credentials. Throws
-	 * exception if the credentials are wrong or if it cannot get the access
-	 * token.
+	 * Tries to get the restTemplate object for the current user credentials.
+	 * Throws exception if the credentials are wrong or if it cannot get
+	 * restTemplate.
 	 * 
 	 * @param email
 	 * @param password
 	 * @return
 	 * @throws FrontServicesException
 	 */
-	public OAuth2AccessToken getAccessToken(String email, String password) throws FrontServicesException;
+	public OAuth2RestTemplate getOAuth2RestTemplateForUserPassword(String email, String password) throws FrontServicesException;
 
 	/**
 	 * Tries to register the user against the user-services. If error throws

@@ -1,7 +1,7 @@
 package com.pabloam.microservices.converter.front.web;
 
 import java.net.URI;
-import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -11,23 +11,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import com.pabloam.microservices.converter.front.services.FrontServices;
+import com.pabloam.microservices.converter.front.web.util.UriUtil;
 
 @Controller
 public class FrontController {
@@ -38,17 +31,27 @@ public class FrontController {
 	@Autowired
 	private FrontServices frontServices;
 
-	@Value("${security.oauth2.resource.userInfoUri}")
-	private String authUserUri;
+	@Autowired
+	private UriUtil uriUtil;
 
+	@Value("#{'${default.currencies}'.split(',')}")
+	private List<String> currencies;
+
+	@Value("${provider.prefix:PROVIDER-}")
+	private String providerPrefix;
+
+	/**
+	 * The index page
+	 * 
+	 * @param session
+	 * @param model
+	 * @return
+	 */
 	@RequestMapping({ "/", "/index" })
-	public String index(Authentication auth, Model model, @RequestParam(value = "error", required = false) String error) {
-		if (auth != null && !(auth instanceof PreAuthenticatedAuthenticationToken)) {
-			model.addAttribute("user", auth.getName());
-		}
-
-		if (StringUtils.hasText(error)) {
-			model.addAttribute("error");
+	public String index(HttpSession session, Model model) {
+		if (session.getAttribute("email") != null) {
+			model.addAttribute("providers", frontServices.getActiveProviders(providerPrefix));
+			model.addAttribute("currencies", currencies);
 		}
 		return "index";
 	}
@@ -60,41 +63,32 @@ public class FrontController {
 	 * @param credentials
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	public String login(@RequestParam("f_un") String email, @RequestParam("f_pw") String password, HttpServletRequest request, Model model) {
 
-		String result = "redirect:index";
-
 		try {
 
-			Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();
-			if (currentAuth != null && CollectionUtils.isEmpty(currentAuth.getAuthorities())) {
-				return result;
-			} else {
-				Authentication preAuth = new UsernamePasswordAuthenticationToken(email, password);
-				SecurityContextHolder.getContext().setAuthentication(preAuth);
-			}
+			// Get the token
+			OAuth2AccessToken accessToken = this.frontServices.getAccessToken(email, password);
+			logger.debug("Token received: {}", accessToken);
 
-			OAuth2RestTemplate restTemplate = this.frontServices.getOAuth2RestTemplateForUserPassword(email, password);
-			OAuth2AccessToken accessToken = restTemplate.getAccessToken();
+			// Ask for user data (I could decode the token but this way I could
+			// gather more info from the user than only the credentials)
 
-			URI uri = UriComponentsBuilder.newInstance().scheme(request.getScheme()).host(request.getServerName()).port(request.getServerPort())
-					.path("/auth/user").build().toUri();
-			Map<String, Object> userCredentials = (Map<String, Object>) restTemplate.getForObject(uri, Map.class);
-			storeCredentialsInSecurityContext(accessToken, userCredentials);
+			URI credentialsUril = uriUtil.composeUri(request, "/auth/user");
+			Map<String, Object> userCredentials = this.frontServices.getUserCredentials(credentialsUril.toString(), accessToken);
+			logger.debug("Credentials received: {}", userCredentials);
+
+			storeInSession(request.getSession(), accessToken, userCredentials);
+
+			logger.debug("Redirecting to index");
+			return "redirect:index";
 
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
-			result = String.format("%s?error=%s", result, e.getMessage());
+			model.addAttribute("error", e.getMessage());
 		}
-		return result;
-	}
-
-	private void storeCredentialsInSecurityContext(OAuth2AccessToken accessToken, Map<String, Object> userCredentials) {
-		Authentication loggedAuth = new UsernamePasswordAuthenticationToken(userCredentials.get("email"), accessToken,
-				(Collection<? extends GrantedAuthority>) userCredentials.get("authorities"));
-		SecurityContextHolder.getContext().setAuthentication(loggedAuth);
+		return "index";
 	}
 
 	/**
@@ -109,27 +103,18 @@ public class FrontController {
 		return "redirect:index";
 	}
 
-	// @RequestMapping(value = "/register", method = RequestMethod.POST)
-	// public ModelAndView register(@RequestParam Map<String, String> allParams,
-	// Model model, HttpSession session) {
-	//
-	// ModelAndView mv = new ModelAndView("index");
-	// try {
-	//
-	// this.frontServices.register(allParams);
-	//
-	// String email = allParams.get("email");
-	// String password = allParams.get("password");
-	//
-	// OAuth2AccessToken accessToken =
-	// this.frontServices.getOAuth2RestTemplateForUserPassword(email, password);
-	//
-	// } catch (Exception e) {
-	// // Do nothing
-	// mv.addObject("error", e.getMessage());
-	// session.invalidate();
-	// }
-	// return mv;
-	// }
+	/**
+	 * Stores the user credentials in the session
+	 * 
+	 * @param session
+	 * @param userCredentials
+	 */
+	private void storeInSession(HttpSession session, OAuth2AccessToken accessToken, Map<String, Object> credentials) {
+		if (!CollectionUtils.isEmpty(credentials)) {
+			session.setAttribute("email", credentials.get("email"));
+			session.setAttribute("authorities", credentials.get("authorities"));
+		}
+		session.setAttribute("token", accessToken);
+	}
 
 }

@@ -1,7 +1,7 @@
 <th:block th:fragment="login">
 
 	<!-- Content -->
-	<div class="col-lg-12 main">
+	<div class="col-lg-12" data-name="login">
 		<div class="well">
 			<form th:action="@{/login}" method="post">
 				<div class="form-group">
@@ -15,20 +15,52 @@
 				<button type="submit" class="btn btn-primary btn-lg btn-block">Sign
 					in</button>
 			</form>
-		</div>
-
-	</div>
+		</div>	
+		<span>Dont you have an account yet? <button class="btn btn-link" data-action="show-register">Sign Up</button></span>
+	</div>	
 
 	<!-- ./Container -->
 
 	<script type="text/javascript" th:inline="javascript">
-		//<![CDATA[
-			var user = [[${session.user}]];
-			if(user != undefined){
-				console.log(user);
+		//<![CDATA[	
+		   var logAnchor;
+		   $(document).ready(function(){
+			   
+			   logAnchor = $('div[data-name="login"]');
+			   
+			   logAnchor.find('button[data-action="register"]').on('click',function(e) {
+					var $btn = $(this);
+				    if(!validate()){
+				      e.preventDefault(); //prevent the default action
+				    }
+			   });
+		   });
+		           
+
+		function validate() {
+			var hasErrors = false;
+			logAnchor.find('div[data-name="register-form"]').find(':input').each(
+					function(idx, obj) {
+						if (!$(obj).val()) {
+							$(obj).closest('.form-group').addClass('has-error')
+									.removeClass('has-success');
+							hasErrors = true;
+						} else {
+							$(obj).closest('.form-group').addClass(
+									'has-success').removeClass('has-error');
+						}
+					});
+			var select = logAnchor.find('select[name="country"]');
+			if (!select.val()) {
+				select.closest('.form-group').addClass('has-error')
+						.removeClass('has-success');
+				hasErrors = true;
 			} else {
-				console.log('User empty');
+				select.closest('.form-group').addClass('has-success')
+						.removeClass('has-error');
 			}
+			return !hasErrors;
+		}
 		//]]>
 	</script>
 </th:block>

@@ -1,5 +1,8 @@
 package com.pabloam.microservices.converter.provider.web;
 
+import java.util.Collections;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
@@ -9,12 +12,9 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.pabloam.microservices.converter.common.ConvertedResponse;
-import com.pabloam.microservices.converter.common.RefreshIntervalEnum;
 import com.pabloam.microservices.converter.provider.services.ProviderServices;
 
 @RestController
@@ -31,26 +31,6 @@ public class ProviderController {
 	private ProviderServices providerServices;
 
 	/**
-	 * Returns the name of the provider implementing the provider services
-	 * 
-	 * @return
-	 */
-	@RequestMapping(value = "/provider/getName", method = RequestMethod.GET)
-	public String getName() {
-		return providerServices.getProviderName();
-	}
-
-	/**
-	 * Returns the refresh interval for the given provider
-	 * 
-	 * @return
-	 */
-	@RequestMapping(value = "/provider/getRefreshInterval", method = RequestMethod.GET)
-	public RefreshIntervalEnum getRefreshInterval() {
-		return providerServices.getRefreshInterval();
-	}
-
-	/**
 	 * Returns the current rates for the given sourceCurrency and the given
 	 * expectedCurrencies
 	 * 
@@ -59,7 +39,7 @@ public class ProviderController {
 	 * @return
 	 */
 	@RequestMapping(value = "provider/getCurrent/{sourceCurrency}/{expectedCurrencies}")
-	public ConvertedResponse getCurrentRates(@PathVariable String sourceCurrency, @PathVariable String[] expectedCurrencies) {
+	public Map<String, Object> getCurrentRates(@PathVariable String sourceCurrency, @PathVariable String[] expectedCurrencies) {
 		return providerServices.getCurrentRates(sourceCurrency, expectedCurrencies);
 	}
 
@@ -73,14 +53,15 @@ public class ProviderController {
 	 * @return
 	 */
 	@RequestMapping(value = "provider/getHistorical/{date}/{sourceCurrency}/{expectedCurrencies}")
-	public ConvertedResponse getCurrentRates(@PathVariable String date, @PathVariable String sourceCurrency, @PathVariable String[] expectedCurrencies) {
+	public Map<String, Object> getCurrentRates(@PathVariable String date, @PathVariable String sourceCurrency, @PathVariable String[] expectedCurrencies) {
 		return providerServices.getHistoricalRates(sourceCurrency, date, expectedCurrencies);
 	}
 
 	// Error Handling
 	@ExceptionHandler(Exception.class)
-	public @ResponseBody String handleRestException(HttpServletRequest request, Exception ex) {
+	public @ResponseBody Map<String, String> handleRestException(HttpServletRequest request, Exception ex) {
 		logger.error(ex.getMessage(), ex);
-		return String.format("Exception in request: '%s' - message: '%s'", request.getRequestURL().toString(), ex.getMessage());
+		return Collections.singletonMap("error",
+				String.format("Exception in request: '%s' - message: '%s'", request.getRequestURL().toString(), ex.getMessage()));
 	}
 }

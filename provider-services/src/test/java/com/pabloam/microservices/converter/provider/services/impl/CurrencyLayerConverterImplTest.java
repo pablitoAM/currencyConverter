@@ -1,6 +1,10 @@
 package com.pabloam.microservices.converter.provider.services.impl;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -23,7 +27,6 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pabloam.microservices.converter.common.ConvertedResponse;
 import com.pabloam.microservices.converter.provider.exceptions.ConversionException;
 
 /**
@@ -55,19 +58,18 @@ public class CurrencyLayerConverterImplTest {
 	 * .
 	 */
 	@Test
-	public void testConvert() throws Exception {
+	public void testConvertCurrent() throws Exception {
 		/*
 		 * Receives a json string. With the object mapper, tries to convert it
-		 * to a map. Once the data is in a map, gets the values to convert it
-		 * into a ConvertedResponse
+		 * to a map.
 		 */
 		Map<String, Object> convertedMap = getConvertedMap(false);
 
-		ConvertedResponse actual = testDefaultConvert(convertedMap);
-		assertFalse(actual.isHistorical());
+		Map<String, Object> actual = testDefaultConvert(convertedMap);
+		assertFalse((Boolean) actual.get("historical"));
 
 		// The date must be null
-		assertNull(actual.getHistoryDate());
+		assertNull(actual.get("historicalDate"));
 	}
 
 	@Test
@@ -80,11 +82,11 @@ public class CurrencyLayerConverterImplTest {
 		 */
 		Map<String, Object> convertedMap = getConvertedMap(true);
 
-		ConvertedResponse actual = testDefaultConvert(convertedMap);
-		assertTrue(actual.isHistorical());
+		Map<String, Object> actual = testDefaultConvert(convertedMap);
+		assertTrue((Boolean) actual.get("historical"));
 
 		// The date has been parsed into a localDate
-		assertNotNull(actual.getHistoryDate());
+		assertNotNull(actual.get("historicalDate"));
 	}
 
 	/**
@@ -97,23 +99,22 @@ public class CurrencyLayerConverterImplTest {
 	 * @throws JsonParseException
 	 * @throws JsonMappingException
 	 */
-	private ConvertedResponse testDefaultConvert(Map<String, Object> convertedMap) throws IOException, JsonParseException, JsonMappingException {
+	private Map<String, Object> testDefaultConvert(Map<String, Object> convertedMap) throws IOException, JsonParseException, JsonMappingException {
 
 		doReturn(convertedMap).when(this.mapper).readValue(eq(jsonResponse), any(TypeReference.class));
-
-		ConvertedResponse actual = this.currencyLayerConverterImpl.convert(jsonResponse);
+		Map<String, Object> actual = this.currencyLayerConverterImpl.convert(jsonResponse);
 
 		// Verification
 		verify(this.mapper).readValue(eq(jsonResponse), any(TypeReference.class));
 		verifyNoMoreInteractions(this.mapper);
 
-		assertEquals(convertedMap.get("source"), actual.getSourceCurrency());
-		assertEquals(convertedMap.get("timestamp"), actual.getTimestamp());
+		assertEquals(convertedMap.get("source"), actual.get("source"));
+		assertEquals(convertedMap.get("timestamp"), actual.get("timestamp"));
 
 		// The quotes have been polished, but the size must be the same
-		@SuppressWarnings("unchecked")
 		Map<String, Double> quotesMap = (Map<String, Double>) convertedMap.get("quotes");
-		assertEquals(quotesMap.size(), actual.getQuotes().size());
+		Map<String, Double> actualQuotesMap = (Map<String, Double>) actual.get("quotes");
+		assertEquals(quotesMap.size(), actualQuotesMap.size());
 
 		return actual;
 	}

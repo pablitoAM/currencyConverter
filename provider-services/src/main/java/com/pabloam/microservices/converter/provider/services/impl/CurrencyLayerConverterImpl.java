@@ -16,8 +16,6 @@ import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pabloam.microservices.converter.common.ConvertedResponse;
-import com.pabloam.microservices.converter.common.impl.ConvertedResponseImpl;
 import com.pabloam.microservices.converter.provider.exceptions.ConversionException;
 import com.pabloam.microservices.converter.provider.services.ConverterServices;
 
@@ -49,7 +47,7 @@ public class CurrencyLayerConverterImpl implements ConverterServices {
 	 * convert(java.lang.String)
 	 */
 	@Override
-	public ConvertedResponse convert(String jsonResponse) throws ConversionException {
+	public Map<String, Object> convert(String jsonResponse) throws ConversionException {
 
 		try {
 
@@ -62,7 +60,7 @@ public class CurrencyLayerConverterImpl implements ConverterServices {
 
 			HashMap<String, Object> responseMap = mapper.readValue(jsonResponse, typeRef);
 
-			ConvertedResponse response = processMap(responseMap);
+			Map<String, Object> response = processMap(responseMap);
 			return response;
 
 		} catch (Exception e) {
@@ -82,9 +80,9 @@ public class CurrencyLayerConverterImpl implements ConverterServices {
 	 * @param responseMap
 	 * @return
 	 */
-	private ConvertedResponse processMap(HashMap<String, Object> responseMap) {
+	private Map<String, Object> processMap(HashMap<String, Object> responseMap) {
 
-		ConvertedResponseImpl response = new ConvertedResponseImpl();
+		Map<String, Object> response = new HashMap<String, Object>();
 
 		// Success?
 		boolean success = (boolean) responseMap.getOrDefault("success", false);
@@ -101,7 +99,7 @@ public class CurrencyLayerConverterImpl implements ConverterServices {
 		// Source Currency
 		String source = (String) responseMap.get("source");
 		if (StringUtils.hasText(source)) {
-			response.setSourceCurrency(source);
+			response.put("source", source);
 		} else {
 			throw new ConversionException("The response must contain a source currency");
 		}
@@ -109,7 +107,7 @@ public class CurrencyLayerConverterImpl implements ConverterServices {
 		// Timestamp
 		Long timestamp = (Long) responseMap.get("timestamp");
 		if (timestamp != null) {
-			response.setTimestamp(timestamp);
+			response.put("timestamp", timestamp);
 		} else {
 			throw new ConversionException("The response must contain a timestamp");
 		}
@@ -120,26 +118,24 @@ public class CurrencyLayerConverterImpl implements ConverterServices {
 		if (!CollectionUtils.isEmpty(quotes)) {
 			// Polish quotes removing the leading source acronyms.
 			Map<String, Double> polishedQuotes = quotes.entrySet().stream().collect(Collectors.toMap(e -> polishKey(source, e.getKey()), e -> e.getValue()));
-			response.setQuotes(polishedQuotes);
+			response.put("quotes", polishedQuotes);
 		} else {
 			throw new ConversionException("The response must contain quotes");
 		}
 
 		// Historical
 		boolean historical = (boolean) responseMap.getOrDefault("historical", false);
+		response.put("historical", historical);
 		if (historical) {
-			response.setHistorical(true);
 
 			// HistoricalDate
 			String historicalDateString = (String) responseMap.get("date");
 			if (StringUtils.hasText(historicalDateString)) {
-				response.setHistoryDate(LocalDate.parse(historicalDateString));
+				response.put("historicalDate", LocalDate.parse(historicalDateString));
 			} else {
 				throw new ConversionException("If the response is historical it must contain a date");
 			}
 
-		} else {
-			response.setHistorical(false);
 		}
 		return response;
 	}

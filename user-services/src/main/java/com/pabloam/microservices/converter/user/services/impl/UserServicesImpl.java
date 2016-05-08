@@ -134,7 +134,7 @@ public class UserServicesImpl implements UserServices {
 		if (birthDate != null) {
 			LocalDateTime userDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(birthDate), TimeZone.getDefault().toZoneId());
 			long years = userDate.until(LocalDateTime.ofInstant(Instant.now(), TimeZone.getDefault().toZoneId()), ChronoUnit.YEARS);
-			return (years > 0 && years < 100);
+			return (years > 10 && years < 100);
 		}
 		return false;
 

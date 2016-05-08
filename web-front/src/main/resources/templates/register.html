@@ -1,127 +1,125 @@
 <th:block th:fragment="register(countries)">
+	<div class="col-lg-12 hidden" data-name="register">
+		<div class="panel panel-default">
 
-	<script
-		src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/js/bootstrap-datepicker.min.js"></script>
+			<div class="panel-heading">
+				<h3 class="panel-title">Register</h3>
+			</div>
+			<form>
+				<div class="panel-body">
 
-	<div class="panel panel-default hidden" data-name="register">
-
-		<div class="panel-heading">
-			<h3 class="panel-title">Register</h3>
-		</div>
-		<form th:action="@{/auth/register}" method="post">
-			<div class="panel-body">
-			
-				<div class="form-horizontal" data-name="register-form">
-					<div class="form-group">
-						<label for="email" class="col-sm-3 control-label">Email</label>
-						<div class="col-sm-9">
-							<input type="email" class="form-control" name="email"
-								placeholder="Email" />
+					<div class="form-horizontal" data-name="register-form">
+						<div class="form-group">
+							<label for="email" class="col-sm-3 control-label">Email</label>
+							<div class="col-sm-9">
+								<input type="email" class="form-control" name="email"
+									placeholder="Email" />
+							</div>
 						</div>
-					</div>
-					<div class="form-group">
-						<label for="password" class="col-sm-3 control-label">Password</label>
-						<div class="col-sm-9">
-							<input type="password" class="form-control" name="password"
-								placeholder="password" />
+						<div class="form-group">
+							<label for="password" class="col-sm-3 control-label">Password</label>
+							<div class="col-sm-9">
+								<input type="password" class="form-control" name="password"
+									placeholder="password" />
+							</div>
 						</div>
-					</div>
-					<div class="form-group">
-						<label for="birthdate" class="col-sm-3 control-label">Birth
-							Date</label>
-						<div class="col-sm-9">
-							<div class="input-group date" data-name="date">
-								<input type="text" class="form-control" name="birthDate"
-									placeholder="dd/mm/yyyy" />
-								<div class="input-group-addon">
-									<span class="glyphicon glyphicon-th"></span>
+						<div class="form-group">
+							<label for="birthdate" class="col-sm-3 control-label">Birth
+								Date</label>
+							<div class="col-sm-9">
+								<div class="input-group date" data-name="date">
+									<input type="text" class="form-control" name="birthDate"
+										placeholder="dd/mm/yyyy" />
+									<div class="input-group-addon">
+										<span class="glyphicon glyphicon-th"></span>
+									</div>
 								</div>
 							</div>
 						</div>
-					</div>
-					<div class="form-group">
-						<label for="address" class="col-sm-3 control-label">Address</label>
-						<div class="col-sm-9">
-							<input type="text" class="form-control" name="address"
-								placeholder="Address" />
+						<div class="form-group">
+							<label for="address" class="col-sm-3 control-label">Address</label>
+							<div class="col-sm-9">
+								<input type="text" class="form-control" name="address"
+									placeholder="Address" />
+							</div>
 						</div>
-					</div>
-					<div class="form-group">
-						<label for="zip" class="col-sm-3 control-label">Zip Code</label>
-						<div class="col-sm-9">
-							<input type="text" class="form-control" name="zipCode"
-								placeholder="Zip Code" />
+						<div class="form-group">
+							<label for="zip" class="col-sm-3 control-label">Zip Code</label>
+							<div class="col-sm-9">
+								<input type="text" class="form-control" name="zipCode"
+									placeholder="Zip Code" />
+							</div>
+						</div>
+
+						<div class="form-group">
+							<label for="country" class="col-sm-3 control-label">Country</label>
+							<div class="col-sm-9">
+								<select class="form-control" name="country">
+									<option disabled="disabled" selected="selected" value="">Select
+										Country</option>
+								</select>
+							</div>
 						</div>
 					</div>
 
-					<div class="form-group">
-						<label for="country" class="col-sm-3 control-label">Country</label>
-						<div class="col-sm-9">
-							<select class="form-control" name="country">
-								<option disabled="disabled" selected="selected" value="">Select
-									Country</option>
-							</select>
-						</div>
-					</div>
 				</div>
-
-			</div>
-			<div class="panel-footer">
-				<button class="btn btn-primary pull-right" type="submit"
-					data-action="register">Register</button>
-				<div class="clearfix"></div>
-			</div>
-		</form>
+				<div class="panel-footer">
+					<button class="btn btn-primary pull-right" type="button"
+						data-action="register">Register</button>
+					<div class="clearfix"></div>
+				</div>
+			</form>
+		</div>
+		<span>Do you already have an account?
+			<button class="btn btn-link" data-action="show-login">Sign
+				In</button>
+		</span>
 	</div>
-
-
+	<script
+		src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.0/js/bootstrap-datepicker.min.js"></script>
 	<script type="text/javascript" th:inline="javascript">
-		//<![CDATA[				
-		$(document).ready(function(){
+		//<![CDATA[		
+		
+		var regAnchor;
+		$(document).ready(function(){		
+			
+			regAnchor = $('div[data-name="register"]');
 			
 			initDatePicker();			
-				loadCountries();			
+			loadCountries();
 				
-				
-				$('button[data-action="register"]').on('click',function(e) {				    
-				    if(!validate()){
-				      e.preventDefault(); //prevent the default action
-				    }
-				});
-				
-// 				$('button[data-action="register"]').on('click', function(){					
-// 					var $btn = $(this);
-// 					if(validate()){
-// 						$btn.prop('disabled', true);
+			regAnchor.find('button[data-action="register"]').on('click',function(e) {
+				var $btn = $(this);
+			    if(validate()){
+					$btn.prop('disabled', true);						
+					var data = getData();
+					
+					$.ajax({
+						type: 'POST',
+						url: [[@{/auth/register}]],
+						data: JSON.stringify(data),
+						contentType: 'application/json',
+						dataType: 'json'
 						
-// 						var data = getData();
-						
-// 						$.ajax({
-// 							type: 'POST',
-// 							url: [[@{/auth/register.json}]],
-// 							data: JSON.stringify(data),
-// 							contentType: 'application/json',
-// 							dataType: 'json'
-							
-// 						}).always(function(){
-// 							$btn.prop('disabled', false);	
-// 						}).done(function(result){
-// 							if(result.success){
-// 								// Do something
-// 							} else {
-// 								showError(result.error);								
-// 							}							
-// 						}).fail(function(error){
-// 							console.log(error);
-// 						});
-// 					}					
-// 				});				
+					}).always(function(){
+						$btn.prop('disabled', false);						
+					}).done(function(result){
+						if(result.success){
+							// Do something
+						} else {
+							showError(result.error);
+						}							
+					}).fail(function(error){
+						console.log(error);
+					});
+			    }
+			});			
 				
 		});
 		
 		function validate(){			
 			var hasErrors = false;
-			$('div[data-name="register-form"]').find(':input').each(function(idx, obj){
+			regAnchor.find('div[data-name="register-form"]').find(':input').each(function(idx, obj){
 				if(!$(obj).val()){
 					$(obj).closest('.form-group').addClass('has-error').removeClass('has-success');
 					hasErrors = true;
@@ -129,7 +127,7 @@
 					$(obj).closest('.form-group').addClass('has-success').removeClass('has-error');
 				}
 			});	
-			var select = $('select[name="country"]');
+			var select = regAnchor.find('select[name="country"]');
 				if(!select.val()){
 					select.closest('.form-group').addClass('has-error').removeClass('has-success');
 					hasErrors = true;
@@ -140,11 +138,11 @@
 		}
 		
 		function showError(error){			
-			$('div[data-name="data-name="notifications""]').empty().text(error).removeClass("hidden");			
+			regAnchor.find('div[data-name="notifications"]').empty().text(error).removeClass("hidden");			
 		}
 		
 		function initDatePicker(){
-			$('div[data-name="date"]').datepicker({
+			regAnchor.find('div[data-name="date"]').datepicker({
 				format: 'dd/mm/yyyy',
 				orientation: "bottom auto",
 				defaultViewDate: { year: 1984, month: 8, day: 6 },
@@ -152,23 +150,24 @@
 			});
 		}
 		
-// 		function getData(){
+		function getData(){
 			
-// 			var data = {};
+			var data = {};
 			
-// 			$('div[data-name="register-form"]').find(':input').each(function(idx, obj){				
-// 				data[$(obj).attr('data-name')] = $(obj).val();
-// 			});
+			regAnchor.find('div[data-name="register-form"]').find(':input').each(function(idx, obj){				
+				data[$(obj).attr('name')] = $(obj).val();
+			});
 			
-// 			data['country'] = $('select[data-name="country"]').val();
+			data['country'] = regAnchor.find('select[name="country"]').val();
 			
-// 			return data;
-// 		}
+			return data;
+		}
 		
 		function loadCountries(){
 			$.getJSON([[@{/json/countries.json}]], function(data){
 				if(data != undefined){
-					var select = $('select[name="country"]');
+					var select = regAnchor.find('select[name="country"]');
+					console.log(select);
 					$.each(data, function(idx, obj){
 						select.append('<option>'+obj.name+'</option>');
 					})

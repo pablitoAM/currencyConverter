@@ -10,23 +10,13 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
-import org.springframework.security.oauth2.client.resource.OAuth2AccessDeniedException;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import com.pabloam.microservices.converter.common.DefaultResponse;
-import com.pabloam.microservices.converter.common.ResponseStatus;
-import com.pabloam.microservices.converter.front.exceptions.BadCredentialsException;
 import com.pabloam.microservices.converter.front.exceptions.FrontServicesException;
 import com.pabloam.microservices.converter.front.services.FrontServices;
 import com.pabloam.microservices.converter.front.web.util.OAuth2Util;
@@ -44,18 +34,6 @@ public class FrontServicesImpl implements FrontServices {
 	@Autowired
 	private OAuth2Util oauth2Util;
 
-	@Value("${security.oauth2.client.registerUserUrl:}")
-	private String registerUserUrl;
-
-	@Value("${security.oauth2.client.clientId:}")
-	private String clientId;
-
-	@Value("${security.oauth2.client.clientSecret:}")
-	private String clientSecret;
-
-	@Value("${provider.prefix:PROVIDER-}")
-	protected String providerPrefix;
-
 	@Autowired
 	private DiscoveryClient discoveryClient;
 
@@ -66,54 +44,102 @@ public class FrontServicesImpl implements FrontServices {
 	 * getAccessToken(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public OAuth2RestTemplate getOAuth2RestTemplateForUserPassword(String email, String password) throws FrontServicesException {
-
+	public OAuth2AccessToken getAccessToken(String email, String password) throws FrontServicesException {
 		try {
 			validateCredentials(email, password);
 			OAuth2RestTemplate oAuth2RestTemplate = oauth2Util.getOAuth2RestTemplateForPassword(email, password);
-			return oAuth2RestTemplate;
-
-		} catch (IllegalArgumentException | OAuth2AccessDeniedException e) {
-			logger.error("Exception getting the access token for: '{}:{}'", email, password, e);
-			throw new BadCredentialsException(String.format("Exception getting the access token %s", e.getMessage()));
+			return oAuth2RestTemplate.getAccessToken();
+		} catch (Exception e) {
+			logger.error("Error getting the access token for: '{}:{}'", email, password, e);
+			throw new FrontServicesException(String.format("Error getting the access token %s", e.getMessage()));
 		}
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * com.pabloam.microservices.converter.front.services.FrontServices#register
-	 * (java.util.Map)
+	 * @see com.pabloam.microservices.converter.front.services.FrontServices#
+	 * getUserCredentials(java.lang.String,
+	 * org.springframework.security.oauth2.common.OAuth2AccessToken)
 	 */
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings("unchecked")
 	@Override
-	public void register(Map<String, String> user) throws FrontServicesException {
-
-		if (CollectionUtils.isEmpty(user)) {
-			throw new IllegalArgumentException("The user to register cannot be empty.");
-		}
+	public Map<String, Object> getUserCredentials(String url, OAuth2AccessToken accessToken) throws FrontServicesException {
 		try {
-
-			String base64Creds = prepareClientCredentials(this.clientId, this.clientSecret);
-			HttpHeaders headers = prepareClientHeaders(base64Creds);
-
-			OAuth2RestTemplate oAuth2RestTemplate = this.oauth2Util.getOAuth2RestTemplateForClientCredentials();
-			HttpEntity<Map> entity = new HttpEntity<Map>(user, headers);
-			ResponseEntity<DefaultResponse> httpResponse = oAuth2RestTemplate.exchange(registerUserUrl, HttpMethod.POST, entity, DefaultResponse.class);
-
-			validateResponse(httpResponse);
-
+			OAuth2RestTemplate restTemplate = oauth2Util.getOAuth2RestTemplateForToken(accessToken);
+			return restTemplate.getForObject(url, Map.class);
 		} catch (Exception e) {
-			logger.error("Exception registering '{}'", user, e);
-			throw new FrontServicesException(String.format("Exception registering user: %s", e.getMessage()));
+			logger.error("Error getting the user credentials for the url {} and accessToken {}", url, accessToken, e);
+			throw new FrontServicesException(String.format("Error getting the user credentials: %s", e.getMessage()));
 		}
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.pabloam.microservices.converter.front.services.FrontServices#
+	 * getActiveProviders(java.lang.String)
+	 */
 	@Override
-	public List<String> getActiveProviders() {
+	public List<String> getActiveProviders(String prefix) {
 		List<String> services = this.discoveryClient.getServices();
-		return services.stream().filter(s -> s.startsWith(providerPrefix)).map(s -> s.replace(providerPrefix, "")).collect(Collectors.toList());
+		return services.stream().filter(s -> s.toUpperCase().startsWith(prefix.toUpperCase())).map(s -> s.toUpperCase().replace(prefix.toUpperCase(), ""))
+				.collect(Collectors.toList());
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.pabloam.microservices.converter.front.services.FrontServices#query(
+	 * java.lang.String,
+	 * org.springframework.security.oauth2.common.OAuth2AccessToken,
+	 * java.util.Map)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, Object> query(String url, OAuth2AccessToken accessToken, Map<String, Object> data) throws FrontServicesException {
+
+		try {
+			verifyData(data);
+			url = prepareUrlForProvider(url, data);
+
+			OAuth2RestTemplate restTemplate = oauth2Util.getOAuth2RestTemplateForToken(accessToken);
+			return restTemplate.getForObject(url, Map.class);
+
+		} catch (Exception e) {
+			logger.error("Error in query with the given data: {}", data, e);
+			throw new FrontServicesException(String.format("Error in query: %s", e.getMessage()));
+		}
+	}
+
+	/**
+	 * We have to prepare the url for the provider according to the information
+	 * stored in data
+	 * 
+	 * @param url
+	 * @param data
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	private String prepareUrlForProvider(String url, Map<String, Object> data) {
+
+		String source = (String) data.get("source");
+		boolean historical = (boolean) data.get("historical");
+		String date = (String) data.get("date");
+		String expected = (String) data.get("expected");
+
+		String result = url;
+
+		if (historical) {
+			// provider/getHistorical/{date}/{sourceCurrency}/{expectedCurrencies}
+			result = String.format("%s/provider/getHistorical/%s/%s", url, date, source, expected);
+		} else {
+			// provider/getCurrent/{sourceCurrency}/{expectedCurrencies}
+			result = String.format("%s/provider/getCurrent/%s/%s", url, source, expected);
+		}
+		return result;
+
 	}
 
 	/**
@@ -132,42 +158,38 @@ public class FrontServicesImpl implements FrontServices {
 	}
 
 	/**
-	 * Throws exception if the response is 4xx or 5xx or the response status is
-	 * ERROR
-	 * 
-	 * @param httpResponse
+	 * @param data
 	 */
-	private void validateResponse(ResponseEntity<DefaultResponse> httpResponse) {
-		if (httpResponse.getStatusCode().is4xxClientError() || httpResponse.getStatusCode().is5xxServerError()) {
-			throw new FrontServicesException(httpResponse.getStatusCode().getReasonPhrase());
+	private void verifyData(Map<String, Object> data) {
+
+		if (CollectionUtils.isEmpty(data)) {
+			throw new IllegalArgumentException("The data cannot be empty.");
 		} else {
-			DefaultResponse response = httpResponse.getBody();
-			if (response != null && ResponseStatus.ERROR.equals(response.getStatus())) {
-				throw new FrontServicesException(response.getPayload().toString());
+
+			String provider = (String) data.get("provider");
+			if (!StringUtils.hasText(provider)) {
+				throw new IllegalArgumentException("The provider cannot be empty.");
 			}
+
+			String source = (String) data.get("source");
+			if (!StringUtils.hasText(source)) {
+				throw new IllegalArgumentException("The source source be empty.");
+			}
+
+			boolean historical = (boolean) data.get("historical");
+			if (historical) {
+				String date = (String) data.get("date");
+				if (!StringUtils.hasText(date)) {
+					throw new IllegalArgumentException("The date cannot be empty in a historical query");
+				}
+			}
+
+			String expected = (String) data.get("expected");
+			if (!StringUtils.hasText(expected)) {
+				throw new IllegalArgumentException("The expected currencies cannot be empty.");
+			}
+
 		}
-	}
-
-	/**
-	 * Prepare the headers with the encoded credentials
-	 * 
-	 * @param base64Creds
-	 * @return
-	 */
-	private HttpHeaders prepareClientHeaders(String base64Creds) {
-		HttpHeaders headers = new HttpHeaders();
-		headers.add("Authorization", "Basic " + base64Creds);
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		return headers;
-	}
-
-	/**
-	 * Prepare the credentials to be encoded
-	 */
-	private String prepareClientCredentials(String clientId, String clientSecret) {
-		byte[] base64CredsBytes = Base64.encode(String.format("%s:%s", clientId, clientSecret).getBytes());
-		String base64Creds = new String(base64CredsBytes);
-		return base64Creds;
 	}
 
 }

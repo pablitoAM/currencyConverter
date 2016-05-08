@@ -3,7 +3,6 @@
  */
 package com.pabloam.microservices.converter.provider.services.impl;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -13,6 +12,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,10 +27,9 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import com.pabloam.microservices.converter.common.ConvertedResponse;
-import com.pabloam.microservices.converter.common.RefreshIntervalEnum;
 import com.pabloam.microservices.converter.provider.exceptions.ConversionException;
 import com.pabloam.microservices.converter.provider.exceptions.RequestException;
+import com.pabloam.microservices.converter.provider.model.RefreshIntervalEnum;
 import com.pabloam.microservices.converter.provider.services.ConverterServices;
 import com.pabloam.microservices.converter.provider.services.UriCreator;
 
@@ -73,39 +73,6 @@ public class CurrencyLayerImplTest {
 
 	/**
 	 * Test method for
-	 * {@link com.pabloam.microservices.converter.provider.services.impl.CurrencyLayerImpl#getProviderName()}
-	 * .
-	 */
-	@Test
-	public void testGetProviderName() throws Exception {
-		/*
-		 * When invoked must return the provider name
-		 */
-		String expected = this.currencyLayerImpl.providerName;
-
-		String actual = this.currencyLayerImpl.getProviderName();
-		assertEquals(expected, actual);
-
-	}
-
-	/**
-	 * Test method for
-	 * {@link com.pabloam.microservices.converter.provider.services.impl.CurrencyLayerImpl#getRefreshInterval()}
-	 * .
-	 */
-	@Test
-	public void testGetRefreshInterval() throws Exception {
-		/*
-		 * When invoked must return the refresh interval
-		 */
-		RefreshIntervalEnum expected = this.currencyLayerImpl.refreshInterval;
-
-		RefreshIntervalEnum actual = this.currencyLayerImpl.getRefreshInterval();
-		assertEquals(expected, actual);
-	}
-
-	/**
-	 * Test method for
 	 * {@link com.pabloam.microservices.converter.provider.services.impl.CurrencyLayerImpl#getCurrentRates(java.lang.String, java.lang.String[])}
 	 * .
 	 */
@@ -118,7 +85,7 @@ public class CurrencyLayerImplTest {
 		 */
 		@SuppressWarnings("unchecked")
 		ResponseEntity<String> mockedResponse = mock(ResponseEntity.class);
-		ConvertedResponse convertedRespose = mock(ConvertedResponse.class);
+		Map<String, Object> convertedRespose = new HashMap<String, Object>();
 		URI uri = URI.create("randomUri");
 
 		String jsonResponse = "Correct Json";
@@ -154,7 +121,7 @@ public class CurrencyLayerImplTest {
 		 */
 		@SuppressWarnings("unchecked")
 		ResponseEntity<String> mockedResponse = mock(ResponseEntity.class);
-		ConvertedResponse convertedRespose = mock(ConvertedResponse.class);
+		Map<String, Object> convertedRespose = new HashMap<String, Object>();
 		URI uri = URI.create("randomUri");
 
 		String jsonResponse = "Correct Json";

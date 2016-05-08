@@ -3,7 +3,9 @@ package com.pabloam.microservices.converter.user.services.web;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -11,14 +13,19 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.pabloam.microservices.converter.user.model.User;
+import com.pabloam.microservices.converter.user.services.UserServices;
 
 @RestController
 public class UserRestController {
@@ -26,11 +33,11 @@ public class UserRestController {
 	// The logger
 	final Logger logger = (Logger) LoggerFactory.getLogger(UserRestController.class);
 
-	// @Autowired
-	// private UserServices userServices;
+	@Autowired
+	private UserServices userServices;
 
-	// @Value("#{'${default.user.groups}'.split(',')}")
-	// private List<String> defaultUserGroups;
+	@Value("#{'${default.user.groups}'.split(',')}")
+	private List<String> defaultUserGroups;
 
 	/**
 	 * Returns the principal
@@ -52,22 +59,14 @@ public class UserRestController {
 	 * @param user
 	 * @return
 	 */
-	// @RequestMapping(value = "/register", method = RequestMethod.POST)
-	// public DefaultResponse register(@RequestBody Map<String, Object> data) {
-	//
-	// DefaultResponse result = new DefaultResponse();
-	// try {
-	// User user = userServices.register(processData(data), defaultUserGroups);
-	// result =
-	// result.setStatus(ResponseStatus.SUCCESS).setPayload(user.getEmail());
-	//
-	// } catch (Exception e) {
-	// logger.error(e.getMessage(), e);
-	// result =
-	// result.setStatus(ResponseStatus.ERROR).setPayload(e.getMessage());
-	// }
-	// return result;
-	// }
+	@RequestMapping(value = "/register", method = RequestMethod.POST)
+	public Map<String, String> register(@RequestBody Map<String, Object> data) {
+
+		Map<String, String> result = new HashMap<String, String>();
+		User user = userServices.register(processData(data), defaultUserGroups);
+		result.put("success", user.getEmail());
+		return result;
+	}
 
 	/**
 	 * Sets the data into a User pojo
@@ -96,9 +95,10 @@ public class UserRestController {
 
 	// Error Handling
 	@ExceptionHandler(Exception.class)
-	public @ResponseBody String handleRestException(HttpServletRequest request, Exception ex) {
+	public @ResponseBody Map<String, String> handleRestException(HttpServletRequest request, Exception ex) {
 		logger.error(ex.getMessage(), ex);
-		return String.format("Exception in request: '%s' - message: '%s'", request.getRequestURL().toString(), ex.getMessage());
+		return Collections.singletonMap("error",
+				String.format("Exception in request: '%s' - message: '%s'", request.getRequestURL().toString(), ex.getMessage()));
 	}
 
 }

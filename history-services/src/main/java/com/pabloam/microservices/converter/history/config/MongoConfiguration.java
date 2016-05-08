@@ -15,7 +15,7 @@ import com.mongodb.client.MongoDatabase;
  *
  */
 @Configuration
-@Profile("mongodb")
+@Profile("mongodb-prod")
 public class MongoConfiguration {
 
 	// The logger

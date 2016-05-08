@@ -7,7 +7,7 @@
 	<name>converter</name>
 	<description>Parent Currency Converter</description>
 	<modules>
-		<module>common-web</module>
+		
 		
 		<module>history-services</module>
 		<module>provider-services</module>

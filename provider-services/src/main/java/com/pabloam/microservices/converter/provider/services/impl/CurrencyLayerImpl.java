@@ -7,6 +7,8 @@ import java.net.URI;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.Collections;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,10 +24,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
-import com.pabloam.microservices.converter.common.ConvertedResponse;
-import com.pabloam.microservices.converter.common.RefreshIntervalEnum;
 import com.pabloam.microservices.converter.provider.exceptions.BadResponseException;
 import com.pabloam.microservices.converter.provider.exceptions.RequestException;
+import com.pabloam.microservices.converter.provider.model.RefreshIntervalEnum;
 import com.pabloam.microservices.converter.provider.services.ConverterServices;
 import com.pabloam.microservices.converter.provider.services.ProviderServices;
 import com.pabloam.microservices.converter.provider.services.UriCreator;
@@ -46,14 +47,6 @@ public class CurrencyLayerImpl implements ProviderServices {
 	// ===============================
 	// Properties
 	// ===============================
-
-	/**
-	 * 
-	 */
-	public CurrencyLayerImpl() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
 
 	/**
 	 * The name of the provider
@@ -112,22 +105,10 @@ public class CurrencyLayerImpl implements ProviderServices {
 	 * 
 	 * @see
 	 * com.pabloam.microservices.converter.provider.services.ProviderServices#
-	 * getRefreshInterval()
-	 */
-	@Override
-	public RefreshIntervalEnum getRefreshInterval() {
-		return this.refreshInterval;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.pabloam.microservices.converter.provider.services.ProviderServices#
 	 * getCurrentRates(java.lang.String, java.lang.String[])
 	 */
 	@Override
-	public ConvertedResponse getCurrentRates(String sourceCurrency, String... expectedCurrencies) {
+	public Map<String, Object> getCurrentRates(String sourceCurrency, String... expectedCurrencies) {
 		try {
 
 			verifyExpectedCurrencies(expectedCurrencies);
@@ -140,7 +121,7 @@ public class CurrencyLayerImpl implements ProviderServices {
 
 			verifyResponse(response);
 
-			return this.converterServices.convert(response.getBody());
+			return Collections.singletonMap("success", this.converterServices.convert(response.getBody()));
 
 		} catch (Exception e) {
 			logger.error("Exception in getCurrentRates[{}]: {}", this.providerName, e.getMessage(), e);
@@ -157,7 +138,7 @@ public class CurrencyLayerImpl implements ProviderServices {
 	 * java.lang.String[])
 	 */
 	@Override
-	public ConvertedResponse getHistoricalRates(String sourceCurrency, String date, String... expectedCurrencies) {
+	public Map<String, Object> getHistoricalRates(String sourceCurrency, String date, String... expectedCurrencies) {
 		try {
 			verifySourceCurrency(sourceCurrency);
 			verifyExpectedCurrencies(expectedCurrencies);
@@ -170,7 +151,7 @@ public class CurrencyLayerImpl implements ProviderServices {
 
 			verifyResponse(response);
 
-			return this.converterServices.convert(response.getBody());
+			return Collections.singletonMap("success", this.converterServices.convert(response.getBody()));
 
 		} catch (Exception e) {
 			logger.error("Exception in getHistoricalRates[{}]: {}", this.providerName, e.getMessage(), e);
@@ -203,7 +184,7 @@ public class CurrencyLayerImpl implements ProviderServices {
 	 */
 	private void verifyDate(String date) {
 		try {
-			LocalDate localDate = LocalDate.parse(date);
+			LocalDate.parse(date);
 		} catch (DateTimeParseException | NullPointerException e) {
 			throw new IllegalArgumentException("The date is not valid.", e);
 		}

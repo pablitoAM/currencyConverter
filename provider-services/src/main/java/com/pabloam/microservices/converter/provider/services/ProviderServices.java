@@ -1,7 +1,7 @@
 package com.pabloam.microservices.converter.provider.services;
 
-import com.pabloam.microservices.converter.common.ConvertedResponse;
-import com.pabloam.microservices.converter.common.RefreshIntervalEnum;
+import java.util.Map;
+
 import com.pabloam.microservices.converter.provider.exceptions.RequestException;
 
 public interface ProviderServices {
@@ -14,14 +14,7 @@ public interface ProviderServices {
 	public String getProviderName();
 
 	/**
-	 * Returns the refresh period of the provider
-	 * 
-	 * @return
-	 */
-	public RefreshIntervalEnum getRefreshInterval();
-
-	/**
-	 * /** Returns a convertedResponse with the current rates for the given
+	 * /** Returns a Map<String, Object> with the current rates for the given
 	 * sourceCurrency
 	 * 
 	 * @param sourceCurrency
@@ -31,10 +24,10 @@ public interface ProviderServices {
 	 * @return
 	 * @throws RequestException
 	 */
-	public ConvertedResponse getCurrentRates(String sourceCurrency, String... expectedCurrencies) throws RequestException;
+	public Map<String, Object> getCurrentRates(String sourceCurrency, String... expectedCurrencies) throws RequestException;
 
 	/**
-	 * Returns a convertedResponse with the historical rates for the given
+	 * Returns a Map<String, Object> with the historical rates for the given
 	 * sourceCurrency
 	 * 
 	 * @param sourceCurrency
@@ -46,6 +39,6 @@ public interface ProviderServices {
 	 * @return
 	 * @throws RequestException
 	 */
-	public ConvertedResponse getHistoricalRates(String sourceCurrency, String date, String... expectedCurrencies) throws RequestException;
+	public Map<String, Object> getHistoricalRates(String sourceCurrency, String date, String... expectedCurrencies) throws RequestException;
 
 }

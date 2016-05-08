@@ -1,14 +1,15 @@
 <!-- Navbar -->
 <nav class="navbar navbar-default navbar-fixed-top" role="navigation"
-	th:fragment="nav(user)">
+	th:fragment="nav">
 	<div class="container-fluid">
 		<div class="pull-left">
 			<a class="navbar-brand padding-15" th:href="@{/}">Zoo</a>
-		</div>		
-		<div class="pull-right" th:if="${user}">
+		</div>
+		<div class="pull-right" th:if="${session.email}">
 			<img th:src="@{/images/logged.png}" alt="icon" class="img-circle" />
-			<span class="label label-default" th:text="${session.user}"></span> <a
-				th:href="@{/auth/logout}" class="btn btn-default navbar-btn">Sign Out</a>
+			<span class="label label-default" th:text="${session.email}"></span>
+			<a th:href="@{/logout}" class="btn btn-default navbar-btn">Sign
+				Out</a>
 		</div>
 	</div>
 

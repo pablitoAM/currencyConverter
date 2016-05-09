@@ -107,9 +107,11 @@
 						if(result.success){
 							showSuccess(result.sucess);
 						} else {
+							console.log('Error!!!');
 							showError(result.error);
 						}							
 					}).fail(function(error){
+						console.log('Fail!!!');
 						showError(error);
 					});
 			    }
@@ -138,11 +140,11 @@
 		}
 		
 		function showError(error){			
-			regAnchor.find('div[data-name="notifications"]').empty().text(error).removeClass("hidden");			
+			$('div[data-name="notifications"]').empty().text(error).removeClass("hidden");			
 		}
 		
-		function showSucess(sucess){
-			regAnchor.find('div[data-name="register"]:first-child').empty().addClass('bg-success').append(sucess + " registered sucessfully.");		
+		function showSuccess(sucess){
+			regAnchor.children().first().empty().addClass('bg-success').append(sucess + " registered sucessfully.");		
 		}
 		
 		function initDatePicker(){

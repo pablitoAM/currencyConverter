@@ -21,6 +21,6 @@ Finally run:
 ```
 $ sh startup.sh
 ```
-To test the application open the explorer with the url http://localhost:8080
+To test the application open the explorer with the url http://localhost:8080 for local instances.
 
-> This project is meant for educational purposes
+> This project is meant for educational purposes and can be examined at: http://zoo.pabloam.com

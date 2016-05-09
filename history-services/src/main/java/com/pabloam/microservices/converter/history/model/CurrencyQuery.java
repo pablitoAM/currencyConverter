@@ -176,20 +176,6 @@ public class CurrencyQuery implements Serializable {
 		} else if (!timestamp.equals(other.timestamp))
 			return false;
 		return true;
-	}
-
-	public static Map<String, Object> toMap(CurrencyQuery instance) {
-
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("email", instance.email);
-		map.put("created", instance.created);
-		map.put("date", instance.date);
-		map.put("historical", instance.historical);
-		map.put("provider", instance.provider);
-		map.put("source", instance.source);
-		map.put("timestamp", instance.timestamp);
-		map.put("quotes", instance.quotes.stream().map(q -> Quote.toMap(q)).collect(Collectors.toList()));
-		return map;
-	}
+	}	
 
 }

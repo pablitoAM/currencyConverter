@@ -45,7 +45,7 @@ public class HistoryServicesImpl implements HistoryServices {
 			return this.currencyQueryRepository.getLastQueriesOf(number, userName);
 
 		} catch (Exception e) {
-			logger.error("Exception in getLastQueriesOf with the following parameters: number: '{}', userName: '{}'", new Object[] { number, userName });
+			logger.error("Exception in getLastQueriesOf with the following parameters: number: '{}', email: '{}'", new Object[] { number, userName });
 			throw new HistoryServiceException(String.format("Exception in getLastQueriesOf: %s", e.getMessage()), e);
 		}
 	}

@@ -85,11 +85,11 @@ public class FrontServicesImpl implements FrontServices {
 	 * org.springframework.security.oauth2.common.OAuth2AccessToken)
 	 */
 	@Override
-	public Map<String, Object> getLast(String serviceId, String user, int number, OAuth2AccessToken accessToken) {
+	public List<Map<String, Object>> getLast(String serviceId, String user, int number, OAuth2AccessToken accessToken) {
 		try {
 			String url = prepareUrlForGetLast(serviceId, user, number);
 			OAuth2RestTemplate restTemplate = oauth2Util.getOAuth2RestTemplateForToken(accessToken);
-			return restTemplate.getForObject(url, Map.class);
+			return restTemplate.getForObject(url, List.class);
 		} catch (Exception e) {
 			logger.error("Error getting the last {} queries for the user {}", number, user, e);
 			throw new FrontServicesException(String.format("Error getting the user credentials: %s", e.getMessage()));

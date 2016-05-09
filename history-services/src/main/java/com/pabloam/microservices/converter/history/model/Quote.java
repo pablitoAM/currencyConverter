@@ -56,11 +56,5 @@ public class Quote implements Serializable {
 	public void setValue(Double value) {
 		this.value = value;
 	}
-
-	public static Map<String, Object> toMap(Quote instance) {
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("cuurency", instance.currency);
-		map.put("value", instance.value);
-		return map;
-	}
+	
 }

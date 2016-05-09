@@ -28,9 +28,8 @@ public class HistoryRestController {
 	 * @return
 	 */
 	@RequestMapping(value = "/history/getLast", method = RequestMethod.GET)
-	public List<Map<String, Object>> getLastQueriesOf(@RequestParam("n") int number, @RequestParam("u") String userName) {
-		List<CurrencyQuery> result = historyServices.getLastQueriesOf(number, userName);
-		return result.stream().map(c -> CurrencyQuery.toMap(c)).collect(Collectors.toList());
+	public List<CurrencyQuery> getLastQueriesOf(@RequestParam("n") int number, @RequestParam("u") String userName) {
+		return historyServices.getLastQueriesOf(number, userName);
 	}
 
 	/**

@@ -1,5 +1,7 @@
 package com.pabloam.microservices.converter.history.repositories.mongo;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -41,7 +43,7 @@ public class MongoCurrencyQueryRepository implements CurrencyQueryRepository {
 	@Override
 	public List<CurrencyQuery> getLastQueriesOf(int number, String email) {
 		// @formatter:off
-		Query query = new Query(Criteria.where("email").is(email)).with(new Sort(Sort.Direction.DESC, "crated")).limit(number);
+		Query query = new Query(Criteria.where("email").is(email)).with(new Sort(Sort.Direction.DESC, "created")).limit(number);
 		List<CurrencyQuery> collection = mongodb.find(query, CurrencyQuery.class);
 		// @formatter:on
 		return collection;
@@ -53,6 +55,8 @@ public class MongoCurrencyQueryRepository implements CurrencyQueryRepository {
 	 */
 	@Override
 	public void saveCurrencyQuery(CurrencyQuery currencyQuery) {
+		currencyQuery.setCreated(Instant.now(Clock.systemUTC()).toEpochMilli());
+		currencyQuery.setDeleted(false);
 		mongodb.save(currencyQuery, QUERY_COLLECTION);
 	}
 }

@@ -65,12 +65,9 @@ public class FrontRestController {
 	}
 
 	@RequestMapping(value = "/getLast/{number}", method = RequestMethod.GET)
-	public @ResponseBody Map<String, Object> getLast(HttpSession session, @PathVariable int number) {
-
-		Map<String, Object> result;
-
+	public @ResponseBody List<Map<String, Object>> getLast(HttpSession session, @PathVariable int number) {
 		OAuth2AccessToken accessToken = (OAuth2AccessToken) session.getAttribute("token");
-		result = this.frontServices.getLast(historyServicesClientId, (String) session.getAttribute("email"), number, accessToken);
+		List<Map<String, Object>> result = this.frontServices.getLast(historyServicesClientId, (String) session.getAttribute("email"), number, accessToken);
 		return result;
 	}
 

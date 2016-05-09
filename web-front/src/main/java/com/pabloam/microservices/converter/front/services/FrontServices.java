@@ -60,6 +60,6 @@ public interface FrontServices {
 	 * @param accessToken
 	 * @return
 	 */
-	public Map<String, Object> getLast(String serviceId, String user, int number, OAuth2AccessToken accessToken);
+	public List<Map<String, Object>> getLast(String serviceId, String user, int number, OAuth2AccessToken accessToken);
 
 }

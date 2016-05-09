@@ -1,7 +1,11 @@
 package com.pabloam.microservices.converter.history.model;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
@@ -172,6 +176,20 @@ public class CurrencyQuery implements Serializable {
 		} else if (!timestamp.equals(other.timestamp))
 			return false;
 		return true;
+	}
+
+	public static Map<String, Object> toMap(CurrencyQuery instance) {
+
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("email", instance.email);
+		map.put("created", instance.created);
+		map.put("date", instance.date);
+		map.put("historical", instance.historical);
+		map.put("provider", instance.provider);
+		map.put("source", instance.source);
+		map.put("timestamp", instance.timestamp);
+		map.put("quotes", instance.quotes.stream().map(q -> Quote.toMap(q)).collect(Collectors.toList()));
+		return map;
 	}
 
 }

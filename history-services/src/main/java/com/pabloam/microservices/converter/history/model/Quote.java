@@ -1,6 +1,8 @@
 package com.pabloam.microservices.converter.history.model;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 
@@ -55,4 +57,10 @@ public class Quote implements Serializable {
 		this.value = value;
 	}
 
+	public static Map<String, Object> toMap(Quote instance) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("cuurency", instance.currency);
+		map.put("value", instance.value);
+		return map;
+	}
 }

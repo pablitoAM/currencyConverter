@@ -1,14 +1,11 @@
 package com.pabloam.microservices.converter.history.web;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -31,9 +28,9 @@ public class HistoryRestController {
 	 * @return
 	 */
 	@RequestMapping(value = "/history/getLast", method = RequestMethod.GET)
-	public List<CurrencyQuery> getLastQueriesOf(@RequestParam("n") int number, @RequestParam("u") String userName) {
+	public List<Map<String, Object>> getLastQueriesOf(@RequestParam("n") int number, @RequestParam("u") String userName) {
 		List<CurrencyQuery> result = historyServices.getLastQueriesOf(number, userName);
-		return result;
+		return result.stream().map(c -> CurrencyQuery.toMap(c)).collect(Collectors.toList());
 	}
 
 	/**

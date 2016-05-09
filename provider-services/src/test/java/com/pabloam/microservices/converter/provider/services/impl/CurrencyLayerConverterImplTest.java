@@ -56,7 +56,7 @@ public class CurrencyLayerConverterImplTest {
 		assertFalse((Boolean) actual.get("historical"));
 
 		// The date must be null
-		assertNull(actual.get("historicalDate"));
+		assertNull(actual.get("date"));
 	}
 
 	@Test
@@ -73,7 +73,7 @@ public class CurrencyLayerConverterImplTest {
 		assertTrue((Boolean) actual.get("historical"));
 
 		// The date has been parsed into a localDate
-		assertNotNull(actual.get("historicalDate"));
+		assertNotNull(actual.get("date"));
 	}
 
 	/**

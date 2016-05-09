@@ -3,16 +3,18 @@
  */
 package com.pabloam.microservices.converter.history.services.impl;
 
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import org.bson.Document;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +23,8 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.pabloam.microservices.converter.history.exceptions.HistoryServiceException;
+import com.pabloam.microservices.converter.history.model.CurrencyQuery;
+import com.pabloam.microservices.converter.history.model.Quote;
 import com.pabloam.microservices.converter.history.repositories.CurrencyQueryRepository;
 
 /**
@@ -38,7 +42,8 @@ public class HistoryServicesImplTest {
 
 	private String provider;
 	private String userName;
-	private Map<String, Object> currencyQuery;
+	private CurrencyQuery currencyQuery;
+	private Map<String, Object> mapCurrencyQuery;
 
 	private int number;
 
@@ -50,7 +55,8 @@ public class HistoryServicesImplTest {
 
 		this.provider = "Random Provider";
 		this.userName = "Test User";
-		this.currencyQuery = getCurrencyQueryMap(true);
+		this.mapCurrencyQuery = getCurrencyQueryAsMap(true);
+		this.currencyQuery = getCurrencyQuery(true);
 		this.number = 10;
 
 	}
@@ -111,11 +117,11 @@ public class HistoryServicesImplTest {
 		 * parameters
 		 */
 
-		doNothing().when(this.currencyQueryRepository).saveCurrencyQuery(userName, provider, currencyQuery);
+		doNothing().when(this.currencyQueryRepository).saveCurrencyQuery(currencyQuery);
 
-		this.historyServicesImpl.save(provider, userName, currencyQuery);
+		this.historyServicesImpl.save(provider, userName, mapCurrencyQuery);
 
-		verify(this.currencyQueryRepository).saveCurrencyQuery(userName, provider, currencyQuery);
+		verify(this.currencyQueryRepository).saveCurrencyQuery(any(CurrencyQuery.class));
 		verifyNoMoreInteractions(this.currencyQueryRepository);
 	}
 
@@ -142,7 +148,7 @@ public class HistoryServicesImplTest {
 		/*
 		 * Throws exception when provider is null or empty
 		 */
-		this.historyServicesImpl.save(null, userName, currencyQuery);
+		this.historyServicesImpl.save(null, userName, mapCurrencyQuery);
 	}
 
 	/**
@@ -154,7 +160,7 @@ public class HistoryServicesImplTest {
 		/*
 		 * Throws exception when userName is null or empty
 		 */
-		this.historyServicesImpl.save(provider, null, currencyQuery);
+		this.historyServicesImpl.save(provider, null, mapCurrencyQuery);
 	}
 
 	/**
@@ -162,8 +168,8 @@ public class HistoryServicesImplTest {
 	 * 
 	 * @return
 	 */
-	private Map<String, Object> getCurrencyQueryMap(boolean isHistorical) {
-		Map<String, Object> map = new Document();
+	private Map<String, Object> getCurrencyQueryAsMap(boolean isHistorical) {
+		Map<String, Object> map = new HashMap<>();
 
 		map.put("source", "EUR");
 		map.put("timestamp", Instant.now().toEpochMilli());
@@ -180,6 +186,32 @@ public class HistoryServicesImplTest {
 		}
 
 		return map;
+
+	}
+
+	private CurrencyQuery getCurrencyQuery(boolean isHistorical) {
+		CurrencyQuery cq = new CurrencyQuery();
+
+		cq.setSource("EUR");
+		cq.setTimestamp(Instant.now().toEpochMilli());
+
+		List<Quote> quotesList = new ArrayList<Quote>();
+		Quote q = new Quote();
+		q.setCurrency("ABC");
+		q.setValue(3.456);
+
+		Quote q2 = new Quote();
+		q2.setCurrency("CVD");
+		q2.setValue(2.4546);
+		quotesList.add(q);
+		quotesList.add(q2);
+
+		if (isHistorical) {
+			cq.setHistorical(isHistorical);
+			cq.setDate("2016-05-02");
+		}
+
+		return cq;
 
 	}
 

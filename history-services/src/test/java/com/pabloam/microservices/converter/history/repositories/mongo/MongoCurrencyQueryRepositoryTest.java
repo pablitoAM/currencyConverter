@@ -1,26 +1,30 @@
 package com.pabloam.microservices.converter.history.repositories.mongo;
 
-import static com.mongodb.client.model.Sorts.descending;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.bson.Document;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.util.CollectionUtils;
 
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import com.pabloam.microservices.converter.history.config.FongoTestConfiguration;
+import com.pabloam.microservices.converter.history.model.CurrencyQuery;
+import com.pabloam.microservices.converter.history.model.Quote;
 
 /**
  * @author Pablo
@@ -35,7 +39,7 @@ public class MongoCurrencyQueryRepositoryTest {
 	 * The in-memory database
 	 */
 	@Autowired
-	private MongoDatabase fongodb;
+	private MongoTemplate mongodb;
 
 	/**
 	 * The class to test
@@ -47,7 +51,9 @@ public class MongoCurrencyQueryRepositoryTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		this.repository = new MongoCurrencyQueryRepository(fongodb);
+		this.repository = new MongoCurrencyQueryRepository();
+		this.repository.mongodb = this.mongodb;
+
 	}
 
 	/**
@@ -69,36 +75,35 @@ public class MongoCurrencyQueryRepositoryTest {
 		int maxQueriesToInsert = 25;
 		int numberOfQueriesToRetrieve = 10;
 
-		List<Document> queriesToInsert = new ArrayList<Document>(maxQueriesToInsert);
+		List<CurrencyQuery> queriesToInsert = new ArrayList<CurrencyQuery>(maxQueriesToInsert);
 		List<Long> expectedCreationDates = new ArrayList<Long>(numberOfQueriesToRetrieve);
 
 		for (int i = maxQueriesToInsert - 1; i >= 0; i--) {
-			Document currencyQuery = (Document) getCurrencyQueryDocument(true);
+			CurrencyQuery currencyQuery = getCurrencyQuery(true);
 
 			// Add userName, provider and created timestamp
-			currencyQuery.put("userName", userName);
-			currencyQuery.put("provider", provider);
-			currencyQuery.put("created", Instant.now().toEpochMilli());
+			currencyQuery.setEmail(userName);
+			currencyQuery.setProvider(provider);
+			currencyQuery.setCreated(Instant.now().toEpochMilli());
 			queriesToInsert.add(currencyQuery);
 
 			if (i < numberOfQueriesToRetrieve) {
-				expectedCreationDates.add((Long) currencyQuery.get("created"));
+				expectedCreationDates.add((Long) currencyQuery.getCreated());
 			}
 
 		}
 
 		// Insert them into mongo
-		MongoCollection<Document> collection = fongodb.getCollection(MongoCurrencyQueryRepository.QUERY_COLLECTION);
-		collection.insertMany(queriesToInsert);
+		mongodb.insert(queriesToInsert, CurrencyQuery.class);
 
-		List<Map<String, Object>> lastQueriesOf = this.repository.getLastQueriesOf(numberOfQueriesToRetrieve, userName);
+		List<CurrencyQuery> lastQueriesOf = this.repository.getLastQueriesOf(numberOfQueriesToRetrieve, userName);
 
 		// Verify last ten
 		assertEquals(expectedCreationDates.size(), lastQueriesOf.size());
 
 		lastQueriesOf.stream().forEach(e -> {
 			// Verify the queries are the expected
-			assertTrue(expectedCreationDates.contains(e.get("created")));
+			assertTrue(expectedCreationDates.contains(e.getCreated()));
 		});
 
 	}
@@ -117,26 +122,24 @@ public class MongoCurrencyQueryRepositoryTest {
 		String userName = "Test user";
 		String provider = "Random provider";
 
-		Map<String, Object> currencyQuery = getCurrencyQueryDocument(true);
+		CurrencyQuery currencyQuery = getCurrencyQuery(true);
+		currencyQuery.setEmail(userName);
+		currencyQuery.setProvider(provider);
+		currencyQuery.setCreated(Instant.now().toEpochMilli());
 
-		this.repository.saveCurrencyQuery(userName, provider, currencyQuery);
+		this.repository.saveCurrencyQuery(currencyQuery);
 
 		// Verify it exists
-		ArrayList<Map<String, Object>> itemFound = fongodb.getCollection(MongoCurrencyQueryRepository.QUERY_COLLECTION).find(new Document("userName", userName))
-				.sort(descending("created")).limit(1).into(new ArrayList<Map<String, Object>>());
+		Query query = new Query(Criteria.where("email").is(userName)).with(new Sort(Sort.Direction.DESC, "created")).limit(1);
+		List<CurrencyQuery> list = mongodb.find(query, CurrencyQuery.class);
 
-		assertEquals(itemFound.size(), 1);
+		Assert.assertTrue(!CollectionUtils.isEmpty(list));
 
-		Map<String, Object> item = itemFound.get(0);
+		CurrencyQuery itemFound = list.get(0);
+		assertNotNull(itemFound);
 
-		assertEquals(userName, item.get("userName"));
-		assertEquals(provider, item.get("provider"));
-		currencyQuery.entrySet().stream().forEach(entry -> {
-
-			// Verify
-
-			assertEquals(entry.getValue(), item.get(entry.getKey()));
-		});
+		assertEquals(userName, itemFound.getEmail());
+		assertEquals(provider, itemFound.getProvider());
 	}
 
 	/**
@@ -144,24 +147,29 @@ public class MongoCurrencyQueryRepositoryTest {
 	 * 
 	 * @return
 	 */
-	private Map<String, Object> getCurrencyQueryDocument(boolean isHistorical) {
-		Map<String, Object> map = new Document();
+	private CurrencyQuery getCurrencyQuery(boolean isHistorical) {
+		CurrencyQuery cq = new CurrencyQuery();
 
-		map.put("source", "EUR");
-		map.put("timestamp", Instant.now().toEpochMilli());
+		cq.setSource("EUR");
+		cq.setTimestamp(Instant.now().toEpochMilli());
 
-		Map<String, Double> quotesMap = new HashMap<String, Double>();
-		quotesMap.put("ABC", 3.456);
-		quotesMap.put("BCD", 7.890);
+		List<Quote> quotesList = new ArrayList<Quote>();
+		Quote q = new Quote();
+		q.setCurrency("ABC");
+		q.setValue(3.456);
 
-		map.put("quotes", quotesMap);
+		Quote q2 = new Quote();
+		q2.setCurrency("CVD");
+		q2.setValue(2.4546);
+		quotesList.add(q);
+		quotesList.add(q2);
 
 		if (isHistorical) {
-			map.put("historical", true);
-			map.put("date", "2016-05-02");
+			cq.setHistorical(isHistorical);
+			cq.setDate("2016-05-02");
 		}
 
-		return map;
+		return cq;
 
 	}
 

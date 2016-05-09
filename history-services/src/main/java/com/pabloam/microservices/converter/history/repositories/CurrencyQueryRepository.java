@@ -3,10 +3,17 @@ package com.pabloam.microservices.converter.history.repositories;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.context.annotation.Profile;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
+
+import com.pabloam.microservices.converter.history.model.CurrencyQuery;
+
 /**
  * @author Pablo
  *
  */
+@Profile("mongodb")
 public interface CurrencyQueryRepository {
 
 	/**
@@ -16,16 +23,11 @@ public interface CurrencyQueryRepository {
 	 * @param userName
 	 * @return
 	 */
-	public List<Map<String, Object>> getLastQueriesOf(int number, String userName);
+	public List<CurrencyQuery> getLastQueriesOf(int number, String userName);
 
 	/**
-	 * Saves the given map with the given userName and provider into the
-	 * database
-	 * 
-	 * @param userName
-	 * @param provider
-	 * @param currencyQuery
+	 * Saves a currencyQuery into the database
 	 */
-	public void saveCurrencyQuery(String userName, String provider, Map<String, Object> currencyQuery);
+	public void saveCurrencyQuery(CurrencyQuery currencyQuery);
 
 }

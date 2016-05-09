@@ -44,15 +44,12 @@
 			</div>
 
 			<div th:if="${error}" class="col-lg-12 main">
-				<div class="alert alert-danger" th:text="${error}"></div>
+				<div class="alert alert-danger" th:text="${error}"
+					data-name="notifications"></div>
 			</div>
 
 			<!-- Content -->
 			<div class="col-lg-12 main">
-				<div th:if="${session.token}">
-					<div th:replace="main :: main(${providers}, ${currencies})"></div>
-				</div>
-
 				<div th:unless="${session.token}">
 					<div th:replace="login :: login"></div>
 					<div th:replace="register :: register(${countries})"></div>
@@ -76,12 +73,12 @@
 
 			$('button[data-action="show-login"]').on('click', function() {
 				login.removeClass('hidden');
-				register.addClass('hidden');				
+				register.addClass('hidden');
 			});
 
 			$('button[data-action="show-register"]').on('click', function() {
 				register.removeClass('hidden');
-				login.addClass('hidden');				
+				login.addClass('hidden');
 			});
 
 			anchor = login;

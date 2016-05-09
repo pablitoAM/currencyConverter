@@ -42,12 +42,24 @@ public interface FrontServices {
 	 * Validates the input data and queries the provider associated to that data
 	 * with the given accessToken
 	 * 
-	 * @param url
+	 * @param providerPrefix
 	 * @param accessToken
 	 * @param data
 	 * @return
 	 * @throws FrontServicesException
 	 */
-	public Map<String, Object> query(String url, OAuth2AccessToken accessToken, Map<String, Object> data) throws FrontServicesException;
+	public Map<String, Object> query(String email, String providerPrefix, OAuth2AccessToken accessToken, Map<String, Object> data)
+			throws FrontServicesException;
+
+	/**
+	 * Gets the last number queries from the user
+	 *
+	 * 
+	 * @param user
+	 * @param number
+	 * @param accessToken
+	 * @return
+	 */
+	public Map<String, Object> getLast(String serviceId, String user, int number, OAuth2AccessToken accessToken);
 
 }

@@ -24,19 +24,20 @@
 
 				<!-- Current or Historical -->
 				<div class="form-group">
-					<label for="source" class="control-label">Source Currency</label>
-					<div class="input-group">
-						<div class="input-group">
-							<span class="input-group-addon"> <input type="checkbox"
-								name="historical" /> Is Historical?
-							</span> <input type="text" class="form-control" name="date"
-								disabled="disabled" /> <span class="input-group-addon">
-								<span class="glyphicon glyphicon-th"></span>
-							</span>
+					<input type="checkbox" name="historical" /> <label
+						for="historical" class="control-label">Historical</label>
+				</div>
+
+				<div class="form-group">
+					<div class="input-group date" data-name="date">
+						<input type="text" class="form-control" name="date"
+							disabled="disabled" />
+						<div class="input-group-addon">
+							<span class="glyphicon glyphicon-th"></span>
 						</div>
-						<!-- /input-group -->
 					</div>
 				</div>
+
 				<div class="form-group">
 					<button class="btn btn-primary pull-right" data-action="query"
 						th:disabled="${#lists.isEmpty(providers)}">Query</button>
@@ -60,12 +61,13 @@
 			qAnchor = $('div[data-name="query"]');
 			
 			initCheckbox();
+			initDatePicker();
 			initQueryButton();
 		});
 		
 		function initCheckbox(){			
 			qAnchor.find('input[name="historical"]').click(function() {							
-				var field = $(this).parent().parent().find('input[name="date"]');
+				var field = qAnchor.find('input[name="date"]');
 				
 				if(this.checked){
 					field.prop('disabled', false);
@@ -78,6 +80,14 @@
 			});			
 		}
 		
+		function initDatePicker(){
+			qAnchor.find('div[data-name="date"]').datepicker({
+				format: 'yyyy-mm-dd',
+				orientation: "bottom auto",				
+				autoclose: true
+			});
+		}
+		
 		function initQueryButton(){
 			
 			qAnchor.find('button[data-action="query"]').on('click', function(){				
@@ -87,15 +97,37 @@
 					// validate if historical
 					var check = qAnchor.find('input[name="historical"]')
 					var isHistorical = check.get(0).checked;
-					if(!isHistorical || qAnchor.find('input[name="date"]').val() != ''){
-						check.parent().parent().removeClass('has-error');
+					var date = qAnchor.find('input[name="date"]');
+					if(!isHistorical || date.val() != ''){
+						date.parent().removeClass('has-error');
 						
+						btn.prop('disabled', true);						
 						var data = getData();
-						invokeQuery([[@{/query}]],data, refreshBoxes);
+						
+						$.ajax({
+							type: 'POST',
+							url: [[@{/query}]],
+							data: JSON.stringify(data),
+							contentType: 'application/json',
+							dataType: 'json'
+							
+						}).always(function(){
+							btn.prop('disabled', false);						
+						}).done(function(result){
+							console.log(result);
+							if(result.success){	
+								refreshBoxes(result.success);
+							} else {
+								console.log('showing error');
+								showError(result.error);
+							}							
+						}).fail(function(error){
+							showError(error);
+						});
 						
 					} else {
 						// Is invalid
-						check.parent().parent().addClass('has-error');
+						date.parent().addClass('has-error');
 					}
 				}
 			});
@@ -106,35 +138,28 @@
 			
 			var data = {};
 			data['provider'] = qAnchor.find('select[name="provider"]').val();
-			data['soruce'] = qAnchor.find('select[name="soruce"]').val();
-			data['isHistorical'] = qAnchor.find('input[name="historical"]').get(0).checked;
+			data['source'] = qAnchor.find('select[name="source"]').val();
+			data['historical'] = qAnchor.find('input[name="historical"]').get(0).checked;
 			if(data.historical){
 				data['date'] = qAnchor.find('input[name="date"]').val();				
 			}
 			
 			return data;
 			
+		}		
+		
+		function showError(error){			
+			$('div[data-name="notifications"]').empty().text(error).removeClass("hidden");			
 		}
 		
-		function invokeQuery(url, data, callback){
-			
-			$.getJSON(url, data)			
-			.done(function(data, result){
-				callback(result)
-			})
-			.error(function(error){
-				console.log(error);
-			});			
-		}
-		
-		function refreshBoxes(data, result){			
+		function refreshBoxes(result){			
 			var div = qAnchor.find('div[data-name="boxes"]');
 			div.empty();
 			
 			$.each(currencies, function(idx, obj){
 				
-				if(obj != data.source){
-					var value = result[obj] || '';
+				if(obj != result.source){
+					var value = (result.quotes[obj] || '');
 					var box = paintBox(obj, value);
 					div.append(box);					
 				}				
@@ -144,8 +169,10 @@
 		function paintBox(currency, value){
 			var html = '';
 			html += '<div class="form-group">';
-			html += '<label for="c" class="col-sm-3 control-label">'+currency+'</label>';
+			html += '<label class="col-sm-3 control-label">'+currency+'</label>';
+			html += '<div class="col-sm-9">';
 			html += '<span class="form-control">'+value+'</span>';
+			html += '</div>';		
 			html += '</div>';		
 			
 			return html;

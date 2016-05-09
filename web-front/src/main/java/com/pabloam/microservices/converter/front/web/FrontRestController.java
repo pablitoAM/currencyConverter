@@ -1,9 +1,9 @@
 package com.pabloam.microservices.converter.front.web;
 
-import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -14,13 +14,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.pabloam.microservices.converter.front.services.FrontServices;
-import com.pabloam.microservices.converter.front.web.util.UriUtil;
+import com.pabloam.microservices.converter.front.services.PublishingServices;
 
 @RestController
 public class FrontRestController {
@@ -32,7 +35,7 @@ public class FrontRestController {
 	private FrontServices frontServices;
 
 	@Autowired
-	private UriUtil uriUtil;
+	private PublishingServices publishingServices;
 
 	@Value("#{'${default.currencies}'.split(',')}")
 	private List<String> currencies;
@@ -40,22 +43,34 @@ public class FrontRestController {
 	@Value("${provider.prefix:PROVIDER-}")
 	private String providerPrefix;
 
-	@RequestMapping("/query")
-	public @ResponseBody Map<String, Object> query(HttpServletRequest request, HttpSession session, @RequestBody Map<String, Object> data) {
+	@Value("${history.services.client.id:}")
+	protected String historyServicesClientId;
+
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value = "/query", method = RequestMethod.POST)
+	public @ResponseBody Map<String, Object> query(HttpSession session, @RequestBody Map<String, Object> data) {
 
 		Map<String, Object> result;
 
-		try {
-			OAuth2AccessToken accessToken = (OAuth2AccessToken) session.getAttribute("token");
-			URI providerUri = uriUtil.composeUri(request, String.format("/%s%s", providerPrefix, data.get("provider")));
+		OAuth2AccessToken accessToken = (OAuth2AccessToken) session.getAttribute("token");
+		addExpectedCurrencies(currencies, data);
 
-			addExpectedCurrencies(currencies, data);
-
-			result = frontServices.query(providerUri.toString(), accessToken, data);
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-			result = Collections.singletonMap("error", e.getMessage());
+		result = frontServices.query((String) session.getAttribute("email"), providerPrefix, accessToken, data);
+		if (result.containsKey("success")) {
+			this.publishingServices.publishInHistoryServices((String) session.getAttribute("email"), (String) data.get("provider"), accessToken,
+					(Map<String, Object>) result.get("success"));
 		}
+
+		return result;
+	}
+
+	@RequestMapping(value = "/getLast/{number}", method = RequestMethod.GET)
+	public @ResponseBody Map<String, Object> getLast(HttpSession session, @PathVariable int number) {
+
+		Map<String, Object> result;
+
+		OAuth2AccessToken accessToken = (OAuth2AccessToken) session.getAttribute("token");
+		result = this.frontServices.getLast(historyServicesClientId, (String) session.getAttribute("email"), number, accessToken);
 		return result;
 	}
 
@@ -67,8 +82,15 @@ public class FrontRestController {
 	 */
 	private void addExpectedCurrencies(List<String> currencies, Map<String, Object> data) {
 		String source = (String) data.get("source");
-		currencies.remove(source);
-		data.put("expected", StringUtils.collectionToCommaDelimitedString(currencies));
+		List<String> expected = currencies.stream().collect(Collectors.toList());
+		expected.remove(source);
+		data.put("expected", StringUtils.collectionToCommaDelimitedString(expected));
 	}
 
+	// Error Handling
+	@ExceptionHandler(Exception.class)
+	public @ResponseBody Map<String, String> handleRestException(HttpServletRequest request, Exception ex) {
+		logger.error(ex.getMessage(), ex);
+		return Collections.singletonMap("error", String.format("'%s' - message: '%s'", request.getRequestURL().toString(), ex.getMessage()));
+	}
 }

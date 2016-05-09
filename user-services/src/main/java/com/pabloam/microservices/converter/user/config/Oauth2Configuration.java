@@ -50,9 +50,9 @@ public class Oauth2Configuration extends AuthorizationServerConfigurerAdapter {
 			.inMemory()
 				.withClient("zoo")
 				.secret("zoo")
-				.authorizedGrantTypes("implicit", "authorization_code", "refresh_token", "password")
+				.authorizedGrantTypes("implicit", "authorization_code", "refresh_token", "password", "client_credentials")
 				.scopes("read", "write")				
-				.autoApprove(true);
+				.autoApprove(true);			
 		// @formatter:on
 	}
 

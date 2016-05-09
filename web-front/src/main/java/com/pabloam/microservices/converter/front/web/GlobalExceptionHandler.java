@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.ModelAndView;
 
-@ControllerAdvice
+@ControllerAdvice(assignableTypes = { FrontController.class })
 public class GlobalExceptionHandler {
 
 	// The logger
@@ -19,7 +19,7 @@ public class GlobalExceptionHandler {
 	public ModelAndView handleRestException(HttpServletRequest request, Exception ex) {
 		logger.error(ex.getMessage(), ex);
 		ModelAndView mv = new ModelAndView("index");
-		mv.addObject("error", String.format("Exception in request: '%s' - message: '%s'", request.getRequestURL().toString(), ex.getMessage()));
+		mv.addObject("error", String.format("'%s' - message: '%s'", request.getRequestURL().toString(), ex.getMessage()));
 		return mv;
 	}
 }

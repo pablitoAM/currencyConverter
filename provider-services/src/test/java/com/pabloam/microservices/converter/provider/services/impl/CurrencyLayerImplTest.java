@@ -69,6 +69,7 @@ public class CurrencyLayerImplTest {
 		currencyLayerImpl.providerName = "CurrencyLayerTest";
 		currencyLayerImpl.refreshInterval = RefreshIntervalEnum.HOURLY;
 		currencyLayerImpl.apiKey = "12345";
+		currencyLayerImpl.apiUrl = "http://go.com";
 	}
 
 	/**
@@ -84,24 +85,23 @@ public class CurrencyLayerImplTest {
 		 * invocation to the converter is right.
 		 */
 		@SuppressWarnings("unchecked")
-		ResponseEntity<String> mockedResponse = mock(ResponseEntity.class);
+		ResponseEntity<Map> mockedResponse = mock(ResponseEntity.class);
 		Map<String, Object> convertedRespose = new HashMap<String, Object>();
+		Map<String, Object> originalResponse = new HashMap<String, Object>();
 		URI uri = URI.create("randomUri");
 
-		String jsonResponse = "Correct Json";
-
-		doReturn(uri).when(this.uriCreator).createCurrentUri(CurrencyLayerImpl.URL, currencyLayerImpl.apiKey, sourceCurrency, expected1, expected2);
-		doReturn(jsonResponse).when(mockedResponse).getBody();
+		doReturn(uri).when(this.uriCreator).createCurrentUri(currencyLayerImpl.apiUrl, currencyLayerImpl.apiKey, sourceCurrency, expected1, expected2);
+		doReturn(originalResponse).when(mockedResponse).getBody();
 		doReturn(HttpStatus.ACCEPTED).when(mockedResponse).getStatusCode();
 
-		doReturn(mockedResponse).when(this.restTemplate).exchange(eq(uri), eq(HttpMethod.GET), any(RequestEntity.class), eq(String.class));
-		doReturn(convertedRespose).when(this.converterServices).convert(jsonResponse);
+		doReturn(mockedResponse).when(this.restTemplate).exchange(eq(uri), eq(HttpMethod.GET), any(RequestEntity.class), eq(Map.class));
+		doReturn(convertedRespose).when(this.converterServices).convert(originalResponse);
 
 		this.currencyLayerImpl.getCurrentRates(sourceCurrency, expected1, expected2);
 
-		verify(this.uriCreator).createCurrentUri(CurrencyLayerImpl.URL, currencyLayerImpl.apiKey, sourceCurrency, expected1, expected2);
-		verify(this.restTemplate).exchange(eq(uri), eq(HttpMethod.GET), any(RequestEntity.class), eq(String.class));
-		verify(this.converterServices).convert(jsonResponse);
+		verify(this.uriCreator).createCurrentUri(currencyLayerImpl.apiUrl, currencyLayerImpl.apiKey, sourceCurrency, expected1, expected2);
+		verify(this.restTemplate).exchange(eq(uri), eq(HttpMethod.GET), any(RequestEntity.class), eq(Map.class));
+		verify(this.converterServices).convert(originalResponse);
 		verifyNoMoreInteractions(this.restTemplate, this.converterServices, this.uriCreator);
 
 	}
@@ -120,25 +120,25 @@ public class CurrencyLayerImplTest {
 		 * invocation to the converter is right.
 		 */
 		@SuppressWarnings("unchecked")
-		ResponseEntity<String> mockedResponse = mock(ResponseEntity.class);
+		ResponseEntity<Map> mockedResponse = mock(ResponseEntity.class);
 		Map<String, Object> convertedRespose = new HashMap<String, Object>();
+		Map<String, Object> originalResponse = new HashMap<String, Object>();
 		URI uri = URI.create("randomUri");
 
-		String jsonResponse = "Correct Json";
 		String date = "2016-12-03";
 
-		doReturn(uri).when(this.uriCreator).createHistoricalUri(CurrencyLayerImpl.URL, currencyLayerImpl.apiKey, sourceCurrency, date, expected1, expected2);
-		doReturn(jsonResponse).when(mockedResponse).getBody();
+		doReturn(uri).when(this.uriCreator).createHistoricalUri(currencyLayerImpl.apiUrl, currencyLayerImpl.apiKey, sourceCurrency, date, expected1, expected2);
+		doReturn(originalResponse).when(mockedResponse).getBody();
 		doReturn(HttpStatus.ACCEPTED).when(mockedResponse).getStatusCode();
 
-		doReturn(mockedResponse).when(this.restTemplate).exchange(eq(uri), eq(HttpMethod.GET), any(RequestEntity.class), eq(String.class));
-		doReturn(convertedRespose).when(this.converterServices).convert(jsonResponse);
+		doReturn(mockedResponse).when(this.restTemplate).exchange(eq(uri), eq(HttpMethod.GET), any(RequestEntity.class), eq(Map.class));
+		doReturn(convertedRespose).when(this.converterServices).convert(originalResponse);
 
 		this.currencyLayerImpl.getHistoricalRates(sourceCurrency, date, expected1, expected2);
 
-		verify(this.uriCreator).createHistoricalUri(CurrencyLayerImpl.URL, currencyLayerImpl.apiKey, sourceCurrency, date, expected1, expected2);
-		verify(this.restTemplate).exchange(eq(uri), eq(HttpMethod.GET), any(RequestEntity.class), eq(String.class));
-		verify(this.converterServices).convert(jsonResponse);
+		verify(this.uriCreator).createHistoricalUri(currencyLayerImpl.apiUrl, currencyLayerImpl.apiKey, sourceCurrency, date, expected1, expected2);
+		verify(this.restTemplate).exchange(eq(uri), eq(HttpMethod.GET), any(RequestEntity.class), eq(Map.class));
+		verify(this.converterServices).convert(originalResponse);
 		verifyNoMoreInteractions(this.restTemplate, this.converterServices, this.uriCreator);
 
 	}
@@ -175,8 +175,8 @@ public class CurrencyLayerImplTest {
 		 * Throws exception when the response status is 4xx or 5xx
 		 */
 
-		ResponseEntity<String> mockedResponse = mock(ResponseEntity.class);
-		doReturn(mockedResponse).when(this.restTemplate).exchange(any(URI.class), eq(HttpMethod.GET), any(RequestEntity.class), eq(String.class));
+		ResponseEntity<Map> mockedResponse = mock(ResponseEntity.class);
+		doReturn(mockedResponse).when(this.restTemplate).exchange(any(URI.class), eq(HttpMethod.GET), any(RequestEntity.class), eq(Map.class));
 		doReturn(HttpStatus.NOT_FOUND).when(mockedResponse).getStatusCode();
 
 		this.currencyLayerImpl.getCurrentRates(sourceCurrency, expected1, expected2);
@@ -186,24 +186,15 @@ public class CurrencyLayerImplTest {
 	@Test(expected = RequestException.class)
 	public void testGetCurrentRatesWrongConversion() throws Exception {
 		/*
-		 * Throws exception when the response body is not the expected json
+		 * Throws exception when the response body is not as expected
 		 */
+		Map<String, Object> originalResponse = new HashMap<String, Object>();
 
-		// @formatter:off
-		String unexpectedJson = "{" + 
-				"\"success\": false," +
-					"\"error\": {" +
-					"\"code\": 104," +
-					"\"info\": \"Your monthly usage limit has been reached. Please upgrade your subscription plan.\"" +
-					"}" +
-				"}";
-		// @formatter:on
-
-		ResponseEntity<String> mockedResponse = mock(ResponseEntity.class);
-		doReturn(mockedResponse).when(this.restTemplate).exchange(any(URI.class), eq(HttpMethod.GET), any(RequestEntity.class), eq(String.class));
+		ResponseEntity<Map> mockedResponse = mock(ResponseEntity.class);
+		doReturn(mockedResponse).when(this.restTemplate).exchange(any(URI.class), eq(HttpMethod.GET), any(RequestEntity.class), eq(Map.class));
 		doReturn(HttpStatus.ACCEPTED).when(mockedResponse).getStatusCode();
-		doReturn(unexpectedJson).when(mockedResponse).getBody();
-		doThrow(ConversionException.class).when(this.converterServices).convert(unexpectedJson);
+		doReturn(originalResponse).when(mockedResponse).getBody();
+		doThrow(ConversionException.class).when(this.converterServices).convert(originalResponse);
 
 		this.currencyLayerImpl.getCurrentRates(sourceCurrency, expected1, expected2);
 	}

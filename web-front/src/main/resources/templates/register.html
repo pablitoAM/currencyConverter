@@ -105,12 +105,12 @@
 						$btn.prop('disabled', false);						
 					}).done(function(result){
 						if(result.success){
-							// Do something
+							showSuccess(result.sucess);
 						} else {
 							showError(result.error);
 						}							
 					}).fail(function(error){
-						console.log(error);
+						showError(error);
 					});
 			    }
 			});			
@@ -139,6 +139,10 @@
 		
 		function showError(error){			
 			regAnchor.find('div[data-name="notifications"]').empty().text(error).removeClass("hidden");			
+		}
+		
+		function showSucess(sucess){
+			regAnchor.find('div[data-name="register"]:first-child').empty().addClass('bg-success').append(sucess + " registered sucessfully.");		
 		}
 		
 		function initDatePicker(){

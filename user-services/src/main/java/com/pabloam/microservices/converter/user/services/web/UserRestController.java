@@ -98,7 +98,7 @@ public class UserRestController {
 	public @ResponseBody Map<String, String> handleRestException(HttpServletRequest request, Exception ex) {
 		logger.error(ex.getMessage(), ex);
 		return Collections.singletonMap("error",
-				String.format("Exception in request: '%s' - message: '%s'", request.getRequestURL().toString(), ex.getMessage()));
+				String.format("'%s' - message: '%s'", request.getRequestURL().toString(), ex.getMessage()));
 	}
 
 }

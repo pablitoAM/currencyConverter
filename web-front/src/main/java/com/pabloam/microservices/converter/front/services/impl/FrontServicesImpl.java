@@ -10,7 +10,9 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.cloud.netflix.eureka.EurekaDiscoveryClient.EurekaServiceInstance;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.stereotype.Service;
@@ -77,6 +79,26 @@ public class FrontServicesImpl implements FrontServices {
 	/*
 	 * (non-Javadoc)
 	 * 
+	 * @see
+	 * com.pabloam.microservices.converter.front.services.FrontServices#getLast(
+	 * java.lang.String, int,
+	 * org.springframework.security.oauth2.common.OAuth2AccessToken)
+	 */
+	@Override
+	public Map<String, Object> getLast(String serviceId, String user, int number, OAuth2AccessToken accessToken) {
+		try {
+			String url = prepareUrlForGetLast(serviceId, user, number);
+			OAuth2RestTemplate restTemplate = oauth2Util.getOAuth2RestTemplateForToken(accessToken);
+			return restTemplate.getForObject(url, Map.class);
+		} catch (Exception e) {
+			logger.error("Error getting the last {} queries for the user {}", number, user, e);
+			throw new FrontServicesException(String.format("Error getting the user credentials: %s", e.getMessage()));
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.pabloam.microservices.converter.front.services.FrontServices#
 	 * getActiveProviders(java.lang.String)
 	 */
@@ -98,11 +120,11 @@ public class FrontServicesImpl implements FrontServices {
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public Map<String, Object> query(String url, OAuth2AccessToken accessToken, Map<String, Object> data) throws FrontServicesException {
+	public Map<String, Object> query(String email, String prefix, OAuth2AccessToken accessToken, Map<String, Object> data) throws FrontServicesException {
 
 		try {
 			verifyData(data);
-			url = prepareUrlForProvider(url, data);
+			String url = prepareUrlForProvider(email, prefix, data);
 
 			OAuth2RestTemplate restTemplate = oauth2Util.getOAuth2RestTemplateForToken(accessToken);
 			return restTemplate.getForObject(url, Map.class);
@@ -117,26 +139,44 @@ public class FrontServicesImpl implements FrontServices {
 	 * We have to prepare the url for the provider according to the information
 	 * stored in data
 	 * 
-	 * @param url
+	 * @param prefix
 	 * @param data
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	private String prepareUrlForProvider(String url, Map<String, Object> data) {
+	private String prepareUrlForProvider(String email, String prefix, Map<String, Object> data) {
 
+		String result = null;
+
+		String provider = (String) data.get("provider");
 		String source = (String) data.get("source");
 		boolean historical = (boolean) data.get("historical");
 		String date = (String) data.get("date");
 		String expected = (String) data.get("expected");
 
-		String result = url;
+		List<ServiceInstance> instances = this.discoveryClient.getInstances(String.format("%s%s", prefix, provider));
+		if (!CollectionUtils.isEmpty(instances)) {
+			EurekaServiceInstance firstInstance = (EurekaServiceInstance) instances.get(0);
 
-		if (historical) {
-			// provider/getHistorical/{date}/{sourceCurrency}/{expectedCurrencies}
-			result = String.format("%s/provider/getHistorical/%s/%s", url, date, source, expected);
-		} else {
-			// provider/getCurrent/{sourceCurrency}/{expectedCurrencies}
-			result = String.format("%s/provider/getCurrent/%s/%s", url, source, expected);
+			if (historical) {
+				// provider/getHistorical/{date}/{sourceCurrency}/{expectedCurrencies}
+				result = String.format("%s/provider/getHistorical/%s/%s/%s/%s", firstInstance.getUri(), email, date, source, expected);
+			} else {
+				// provider/getCurrent/{sourceCurrency}/{expectedCurrencies}
+				result = String.format("%s/provider/getCurrent/%s/%s/%s", firstInstance.getUri(), email, source, expected);
+			}
+		}
+		return result;
+
+	}
+
+	private String prepareUrlForGetLast(String serviceId, String user, int number) {
+
+		String result = null;
+		List<ServiceInstance> instances = discoveryClient.getInstances(serviceId);
+		if (!CollectionUtils.isEmpty(instances)) {
+			ServiceInstance serviceInstance = instances.get(0);
+			result = String.format("%s/history/getLast?n=%s&u=%s", serviceInstance.getUri(), number, user);
 		}
 		return result;
 

@@ -50,10 +50,19 @@ public class FrontController {
 	@RequestMapping({ "/", "/index" })
 	public String index(HttpSession session, Model model) {
 		if (session.getAttribute("email") != null) {
-			model.addAttribute("providers", frontServices.getActiveProviders(providerPrefix));
-			model.addAttribute("currencies", currencies);
+			return "redirect:main";
 		}
 		return "index";
+	}
+
+	@RequestMapping("main")
+	public String main(HttpSession session, Model model) {
+		if (session.getAttribute("email") == null) {
+			return "redirect:index";
+		}
+		model.addAttribute("providers", frontServices.getActiveProviders(providerPrefix));
+		model.addAttribute("currencies", currencies);
+		return "main";
 	}
 
 	/**
@@ -81,8 +90,8 @@ public class FrontController {
 
 			storeInSession(request.getSession(), accessToken, userCredentials);
 
-			logger.debug("Redirecting to index");
-			return "redirect:index";
+			logger.debug("Redirecting to main");
+			return "redirect:main";
 
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);

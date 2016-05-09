@@ -2,6 +2,7 @@ package com.pabloam.microservices.converter.history.services.impl;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +12,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.pabloam.microservices.converter.history.exceptions.HistoryServiceException;
+import com.pabloam.microservices.converter.history.model.CurrencyQuery;
+import com.pabloam.microservices.converter.history.model.Quote;
 import com.pabloam.microservices.converter.history.repositories.CurrencyQueryRepository;
 import com.pabloam.microservices.converter.history.services.HistoryServices;
 
@@ -35,7 +38,7 @@ public class HistoryServicesImpl implements HistoryServices {
 	 * getLastQueriesOf(int, java.lang.String)
 	 */
 	@Override
-	public List<Map<String, Object>> getLastQueriesOf(int number, String userName) {
+	public List<CurrencyQuery> getLastQueriesOf(int number, String userName) {
 		try {
 			verifyPositiveNumber(number);
 			verifyUserName(userName);
@@ -55,22 +58,44 @@ public class HistoryServicesImpl implements HistoryServices {
 	 * (java.lang.String, java.lang.String, java.util.Map)
 	 */
 	@Override
-	public Boolean save(String provider, String userName, Map<String, Object> currencyQuery) {
+	public Boolean save(String provider, String userName, Map<String, Object> originalQuery) {
 		try {
 
 			verifyProvider(provider);
 			verifyUserName(userName);
-			verifyCurrencyQuery(currencyQuery);
+			verifyCurrencyQuery(originalQuery);
 
-			this.currencyQueryRepository.saveCurrencyQuery(userName, provider, currencyQuery);
+			CurrencyQuery currencyQuery = createFromOriginal(originalQuery);
+			currencyQuery.setEmail(userName);
+			currencyQuery.setProvider(provider);
+
+			this.currencyQueryRepository.saveCurrencyQuery(currencyQuery);
 			return true;
 
 		} catch (Exception e) {
 			logger.error("Exception saving with the following parameters: provider: '{}', userName: '{}', currencyQuery: '{}'",
-					new Object[] { provider, userName, currencyQuery });
+					new Object[] { provider, userName, originalQuery });
 			throw new HistoryServiceException(String.format("Exception saving currencyQuery: %s", e.getMessage()), e);
 		}
 
+	}
+
+	private CurrencyQuery createFromOriginal(Map<String, Object> originalQuery) {
+		CurrencyQuery q = new CurrencyQuery();
+		q.setEmail((String) originalQuery.get("email"));
+		q.setSource((String) originalQuery.get("source"));
+		q.setTimestamp(((Integer) originalQuery.get("timestamp")).longValue());
+		q.setHistorical((Boolean) originalQuery.get("historical"));
+		q.setDate((String) originalQuery.get("date"));
+		@SuppressWarnings("unchecked")
+		Map<String, Double> originalQuotes = (Map<String, Double>) originalQuery.get("quotes");
+
+		q.setQuotes(originalQuotes.entrySet().stream().map(m -> toQuote(m.getKey(), m.getValue())).collect(Collectors.toList()));
+		return q;
+	}
+
+	private Quote toQuote(String s, Double d) {
+		return new Quote(s, d);
 	}
 
 	/**

@@ -9,7 +9,6 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -18,7 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,16 +41,18 @@ public class FrontServicesImplTest {
 	private OAuth2Util oauth2Util;
 
 	@Mock
-	private OAuth2RestTemplate restTemplate;
-
-	@Mock
 	private DiscoveryClient discoveryClient;
 
 	@InjectMocks
 	private FrontServicesImpl frontServicesImpl;
 
 	@Mock
+	private OAuth2RestTemplate restTemplate;
+
+	@Mock
 	private OAuth2AccessToken accessToken;
+
+	private String email = "test@test.com";
 
 	/**
 	 * @throws java.lang.Exception
@@ -74,10 +74,9 @@ public class FrontServicesImplTest {
 		 */
 		String email = "asdw";
 		String password = "test";
-		OAuth2RestTemplate oAuth2RestTemplate = mock(OAuth2RestTemplate.class);
 
-		doReturn(oAuth2RestTemplate).when(this.oauth2Util).getOAuth2RestTemplateForPassword(email, password);
-		doReturn(accessToken).when(oAuth2RestTemplate).getAccessToken();
+		doReturn(restTemplate).when(this.oauth2Util).getOAuth2RestTemplateForPassword(email, password);
+		doReturn(accessToken).when(restTemplate).getAccessToken();
 
 		this.frontServicesImpl.getAccessToken(email, password);
 		verify(this.oauth2Util).getOAuth2RestTemplateForPassword(email, password);
@@ -192,13 +191,15 @@ public class FrontServicesImplTest {
 		 * provider for the query.
 		 */
 		Map<String, Object> query = getQuery(true);
+		doReturn(null).when(this.discoveryClient).getInstances(anyString());
 		doReturn(this.restTemplate).when(this.oauth2Util).getOAuth2RestTemplateForToken(accessToken);
 		doReturn(null).when(this.restTemplate).getForObject(anyString(), eq(Map.class));
-		this.frontServicesImpl.query("test", accessToken, query);
+		this.frontServicesImpl.query(email, "test", accessToken, query);
 
+		verify(this.discoveryClient).getInstances(anyString());
 		verify(this.restTemplate).getForObject(anyString(), eq(Map.class));
 		verify(this.oauth2Util).getOAuth2RestTemplateForToken(accessToken);
-		verifyNoMoreInteractions(this.restTemplate, this.oauth2Util);
+		verifyNoMoreInteractions(this.restTemplate, this.oauth2Util, this.discoveryClient);
 	}
 
 	/**
@@ -267,7 +268,7 @@ public class FrontServicesImplTest {
 		Map<String, Object> query = getQuery(true);
 		doReturn(this.restTemplate).when(this.oauth2Util).getOAuth2RestTemplateForToken(accessToken);
 		doThrow(RuntimeException.class).when(this.restTemplate).getForObject(anyString(), eq(Map.class));
-		this.frontServicesImpl.query("test", accessToken, query);
+		this.frontServicesImpl.query(email, "test", accessToken, query);
 	}
 
 	/**
@@ -309,6 +310,6 @@ public class FrontServicesImplTest {
 	private void testQueryWithFieldRemoved(String fieldName) {
 		Map<String, Object> query = getQuery(true);
 		query.remove(fieldName);
-		this.frontServicesImpl.query("test", accessToken, query);
+		this.frontServicesImpl.query(email, "test", accessToken, query);
 	}
 }

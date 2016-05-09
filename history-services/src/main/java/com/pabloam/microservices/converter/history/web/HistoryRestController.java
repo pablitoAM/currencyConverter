@@ -1,18 +1,22 @@
 package com.pabloam.microservices.converter.history.web;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.pabloam.microservices.converter.history.model.CurrencyQuery;
 import com.pabloam.microservices.converter.history.services.HistoryServices;
-
-import rx.Observable;
 
 @RestController
 @EnableResourceServer
@@ -26,14 +30,23 @@ public class HistoryRestController {
 	 * 
 	 * @return
 	 */
-	@RequestMapping(value = "/history/getLast/{number}/{username}", method = RequestMethod.GET)
-	public Observable<List<Map<String, Object>>> getLastQueriesOf(@PathVariable int number, @PathVariable String userName) {
-		return Observable.just(historyServices.getLastQueriesOf(number, userName));
+	@RequestMapping(value = "/history/getLast", method = RequestMethod.GET)
+	public List<CurrencyQuery> getLastQueriesOf(@RequestParam("n") int number, @RequestParam("u") String userName) {
+		List<CurrencyQuery> result = historyServices.getLastQueriesOf(number, userName);
+		return result;
 	}
 
-	@RequestMapping(value = "history/save/{username}/{provider}", method = RequestMethod.POST)
-	public Observable<Boolean> saveQuery(@PathVariable String provider, @PathVariable String userName, Map<String, Object> currencyQuery) {
-		return Observable.just(historyServices.save(provider, userName, currencyQuery));
+	/**
+	 * Returns true if the query has been stored
+	 * 
+	 * @param provider
+	 * @param userName
+	 * @param currencyQuery
+	 * @return
+	 */
+	@RequestMapping(value = "history/save", method = RequestMethod.POST)
+	public Boolean saveQuery(@RequestParam("p") String provider, @RequestParam("u") String userName, @RequestBody Map<String, Object> currencyQuery) {
+		return historyServices.save(provider, userName, currencyQuery);
 	}
 
 }

@@ -1,0 +1,38 @@
+<th:block th:fragment="main">
+
+	<div class="panel panel-default" data-name="history">
+		<div class="panel-heading">Latest User Requests</div>
+		<table class="table">
+		</table>
+	</div>
+	<script type="text/javascript" th:inline="javascript">
+		//<![CDATA[
+
+		var hAnchor;
+		$(document).ready(function(){
+			
+			hAnchor = $('div[data-name="history"]');
+			var user = [[${session.email}]];			
+			
+			loadUserQueries(user);
+			
+		});
+		
+			
+		function loadUserQueries(user){
+			
+			$.getJSON([[@{/getLast/10}]], function(data){
+				if(data != undefined){
+					var table = q.find('table');					
+					$.each(data, function(idx, obj){
+						table.append('<tr><td>'+JSON.stringify(obj)+'</td></tr>');
+					});
+				}
+			});			
+		}
+		
+
+
+		//]]>
+	</script>
+</th:block>

@@ -39,8 +39,6 @@ import com.pabloam.microservices.converter.provider.services.UriCreator;
 @Profile("currencylayer")
 public class CurrencyLayerImpl implements ProviderServices {
 
-	protected static final String URL = "http://apilayer.net/api/live";
-
 	// The logger
 	final Logger logger = (Logger) LoggerFactory.getLogger(CurrencyLayerImpl.class);
 
@@ -65,6 +63,9 @@ public class CurrencyLayerImpl implements ProviderServices {
 	 */
 	@Value("${provider.api.key}")
 	protected String apiKey;
+
+	@Value("${provider.api.url}")
+	protected String apiUrl;
 
 	/**
 	 * The restTemplate for REST invocations
@@ -114,10 +115,11 @@ public class CurrencyLayerImpl implements ProviderServices {
 			verifyExpectedCurrencies(expectedCurrencies);
 			verifySourceCurrency(sourceCurrency);
 
-			URI uri = this.uriCreator.createCurrentUri(URL, this.apiKey, sourceCurrency, expectedCurrencies);
+			URI uri = this.uriCreator.createCurrentUri(apiUrl, this.apiKey, sourceCurrency, expectedCurrencies);
 
 			// Invocation to the API
-			ResponseEntity<String> response = this.restTemplate.exchange(uri, HttpMethod.GET, getRequestEntity(), String.class);
+			logger.info("Invoking: {}", uri.toString());
+			ResponseEntity<Map> response = this.restTemplate.exchange(uri, HttpMethod.GET, getRequestEntity(), Map.class);
 
 			verifyResponse(response);
 
@@ -144,10 +146,11 @@ public class CurrencyLayerImpl implements ProviderServices {
 			verifyExpectedCurrencies(expectedCurrencies);
 			verifyDate(date);
 
-			URI uri = this.uriCreator.createHistoricalUri(URL, this.apiKey, sourceCurrency, date, expectedCurrencies);
+			URI uri = this.uriCreator.createHistoricalUri(apiUrl, this.apiKey, sourceCurrency, date, expectedCurrencies);
 
 			// Invocation to the API
-			ResponseEntity<String> response = this.restTemplate.exchange(uri, HttpMethod.GET, getRequestEntity(), String.class);
+			logger.info("Invoking: {}", uri.toString());
+			ResponseEntity<Map> response = this.restTemplate.exchange(uri, HttpMethod.GET, getRequestEntity(), Map.class);
 
 			verifyResponse(response);
 
@@ -217,7 +220,7 @@ public class CurrencyLayerImpl implements ProviderServices {
 	 * 
 	 * @param response
 	 */
-	private void verifyResponse(ResponseEntity<String> response) {
+	private void verifyResponse(ResponseEntity<Map> response) {
 		if (response.getStatusCode().is5xxServerError() || response.getStatusCode().is4xxClientError()) {
 			throw new BadResponseException(
 					String.format("The response from the server is: %s - %s", response.getStatusCode(), response.getStatusCode().getReasonPhrase()));

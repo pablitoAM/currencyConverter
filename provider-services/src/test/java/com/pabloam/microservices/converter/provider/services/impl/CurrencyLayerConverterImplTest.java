@@ -5,11 +5,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -20,13 +15,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pabloam.microservices.converter.provider.exceptions.ConversionException;
 
 /**
@@ -36,20 +28,15 @@ import com.pabloam.microservices.converter.provider.exceptions.ConversionExcepti
 @RunWith(MockitoJUnitRunner.class)
 public class CurrencyLayerConverterImplTest {
 
-	@Mock
-	private ObjectMapper mapper;
-
 	@InjectMocks
 	private CurrencyLayerConverterImpl currencyLayerConverterImpl;
-
-	private String jsonResponse;
 
 	/**
 	 * @throws java.lang.Exception
 	 */
 	@Before
 	public void setUp() throws Exception {
-		this.jsonResponse = "expectedRightJsonResponse";
+
 	}
 
 	/**
@@ -99,20 +86,16 @@ public class CurrencyLayerConverterImplTest {
 	 * @throws JsonParseException
 	 * @throws JsonMappingException
 	 */
-	private Map<String, Object> testDefaultConvert(Map<String, Object> convertedMap) throws IOException, JsonParseException, JsonMappingException {
+	private Map<String, Object> testDefaultConvert(Map<String, Object> response) throws IOException, JsonParseException, JsonMappingException {
 
-		doReturn(convertedMap).when(this.mapper).readValue(eq(jsonResponse), any(TypeReference.class));
-		Map<String, Object> actual = this.currencyLayerConverterImpl.convert(jsonResponse);
+		Map<String, Object> actual = this.currencyLayerConverterImpl.convert(response);
 
 		// Verification
-		verify(this.mapper).readValue(eq(jsonResponse), any(TypeReference.class));
-		verifyNoMoreInteractions(this.mapper);
-
-		assertEquals(convertedMap.get("source"), actual.get("source"));
-		assertEquals(convertedMap.get("timestamp"), actual.get("timestamp"));
+		assertEquals(response.get("source"), actual.get("source"));
+		assertEquals(response.get("timestamp"), actual.get("timestamp"));
 
 		// The quotes have been polished, but the size must be the same
-		Map<String, Double> quotesMap = (Map<String, Double>) convertedMap.get("quotes");
+		Map<String, Double> quotesMap = (Map<String, Double>) response.get("quotes");
 		Map<String, Double> actualQuotesMap = (Map<String, Double>) actual.get("quotes");
 		assertEquals(quotesMap.size(), actualQuotesMap.size());
 
@@ -124,12 +107,9 @@ public class CurrencyLayerConverterImplTest {
 		/*
 		 * Throws exception when the response contains no quotes
 		 */
-		Map<String, Object> convertedMap = getConvertedMap(true);
-		convertedMap.remove("quotes");
-
-		doReturn(convertedMap).when(this.mapper).readValue(eq(jsonResponse), any(TypeReference.class));
-
-		this.currencyLayerConverterImpl.convert(jsonResponse);
+		Map<String, Object> response = getConvertedMap(true);
+		response.remove("quotes");
+		this.currencyLayerConverterImpl.convert(response);
 	}
 
 	@Test(expected = ConversionException.class)
@@ -137,12 +117,9 @@ public class CurrencyLayerConverterImplTest {
 		/*
 		 * Throws exception when the response contains no source
 		 */
-		Map<String, Object> convertedMap = getConvertedMap(true);
-		convertedMap.remove("source");
-
-		doReturn(convertedMap).when(this.mapper).readValue(eq(jsonResponse), any(TypeReference.class));
-
-		this.currencyLayerConverterImpl.convert(jsonResponse);
+		Map<String, Object> response = getConvertedMap(true);
+		response.remove("source");
+		this.currencyLayerConverterImpl.convert(response);
 	}
 
 	@Test(expected = ConversionException.class)
@@ -150,12 +127,9 @@ public class CurrencyLayerConverterImplTest {
 		/*
 		 * Throws exception when the response is historical but contains no date
 		 */
-		Map<String, Object> convertedMap = getConvertedMap(true);
-		convertedMap.remove("date");
-
-		doReturn(convertedMap).when(this.mapper).readValue(eq(jsonResponse), any(TypeReference.class));
-
-		this.currencyLayerConverterImpl.convert(jsonResponse);
+		Map<String, Object> response = getConvertedMap(true);
+		response.remove("date");
+		this.currencyLayerConverterImpl.convert(response);
 	}
 
 	@Test(expected = ConversionException.class)
@@ -163,10 +137,8 @@ public class CurrencyLayerConverterImplTest {
 		/*
 		 * Throws exception when the response is an error message
 		 */
-		Map<String, Object> convertedMap = getErrorMap();
-		doReturn(convertedMap).when(this.mapper).readValue(eq(jsonResponse), any(TypeReference.class));
-
-		this.currencyLayerConverterImpl.convert(jsonResponse);
+		Map<String, Object> response = getErrorMap();
+		this.currencyLayerConverterImpl.convert(response);
 
 	}
 
@@ -175,7 +147,7 @@ public class CurrencyLayerConverterImplTest {
 		/*
 		 * If the input string is wrong, throws a conversionException
 		 */
-		this.currencyLayerConverterImpl.convert("");
+		this.currencyLayerConverterImpl.convert(null);
 	}
 
 	// ===============================

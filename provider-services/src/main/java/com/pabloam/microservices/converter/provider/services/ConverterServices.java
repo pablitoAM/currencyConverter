@@ -7,12 +7,12 @@ import com.pabloam.microservices.converter.provider.exceptions.ConversionExcepti
 public interface ConverterServices {
 
 	/**
-	 * Converts the given response into a map
+	 * Converts the given response into a standard response
 	 * 
-	 * @param jsonResponse
-	 *            the received response in json
+	 * @param response
+	 *            the original response received
 	 * @return
 	 */
-	Map<String, Object> convert(String jsonResponse) throws ConversionException;
+	Map<String, Object> convert(Map<String, Object> response) throws ConversionException;
 
 }

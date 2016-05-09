@@ -46,11 +46,11 @@
 				th:text="${error}" data-name="notifications"></div>
 
 			<div class="row">
-				<div class="col-md-6">
+				<div class="col-md-4">
 					<div
 						th:replace="query-component :: main(${providers}, ${currencies})"></div>
 				</div>
-				<div class="col-md-6">
+				<div class="col-md-8">
 					<div th:replace="history-component :: main"></div>
 				</div>
 			</div>

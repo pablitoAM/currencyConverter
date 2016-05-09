@@ -172,7 +172,7 @@ public class HistoryServicesImplTest {
 		Map<String, Object> map = new HashMap<>();
 
 		map.put("source", "EUR");
-		map.put("timestamp", Instant.now().toEpochMilli());
+		map.put("timestamp", (int) Instant.now().toEpochMilli());
 
 		Map<String, Double> quotesMap = new HashMap<String, Double>();
 		quotesMap.put("ABC", 3.456);

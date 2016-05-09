@@ -1,18 +1,13 @@
 package com.pabloam.microservices.converter.history.model;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-
+@Document(collection = "currencyQueries")
 public class CurrencyQuery implements Serializable {
 
 	/**
@@ -20,8 +15,7 @@ public class CurrencyQuery implements Serializable {
 	 */
 	private static final long serialVersionUID = 8309885467111430037L;
 
-	@Id
-	@JsonSerialize(using = ToStringSerializer.class)
+	@Id	
 	private String id;
 
 	@Indexed

@@ -1,6 +1,5 @@
 package com.pabloam.microservices.converter.provider.services.impl;
 
-import java.time.LocalDate;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -112,9 +111,9 @@ public class CurrencyLayerConverterImpl implements ConverterServices {
 		if (historical) {
 
 			// HistoricalDate
-			String historicalDateString = (String) response.get("date");
-			if (StringUtils.hasText(historicalDateString)) {
-				processedResponse.put("historicalDate", LocalDate.parse(historicalDateString));
+			String date = (String) response.get("date");
+			if (StringUtils.hasText(date)) {
+				processedResponse.put("date", date);
 			} else {
 				throw new ConversionException("If the response is historical it must contain a date");
 			}

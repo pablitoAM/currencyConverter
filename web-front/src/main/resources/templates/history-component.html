@@ -1,11 +1,11 @@
 <th:block th:fragment="main">
 
-	<div class="panel panel-default" data-name="history">
-		<div class="panel-heading">Latest User Requests</div>
-		<table class="table">
-		</table>
-	</div>
-	<script type="text/javascript" th:inline="javascript">
+<div class="panel panel-default" data-name="history">
+	<div class="panel-heading">Latest User Requests</div>
+	<table class="table">
+	</table>
+</div>
+<script type="text/javascript" th:inline="javascript">
 		//<![CDATA[
 
 		var hAnchor;
@@ -18,20 +18,45 @@
 			
 		});
 		
-			
+
 		function loadUserQueries(user){
 			
 			$.getJSON([[@{/getLast/10}]], function(data){
 				if(data != undefined){
-					var table = q.find('table');					
+					var table = hAnchor.find('table');					
 					$.each(data, function(idx, obj){
-						table.append('<tr><td>'+JSON.stringify(obj)+'</td></tr>');
+						table.append(paintQuery(obj));
 					});
 				}
 			});			
 		}
-		
 
+		function paintQuery(query){
+			var html = '';
+			html += '<tr class="active">';
+			html += '<td>'+formatDate(query.created)+'</td>';
+			html += '<td>'+query.provider+'</td>';
+			html += '<td>'+query.source+'</td>';
+			html += '<td>'+query.timestamp+'</td>';
+			html += '<td>'+query.historical+'</td>';						
+			html += '<td>'+ (query.date != null ? query.date : ' ') +'</td>';			
+			html += '<td>'+ ' '+'</td>';	
+			html += '</tr>';
+			html += '<tr>';
+			$.each(query.quotes, function(idx, obj){
+				html += '<td>'+obj.currency+'</br>' + obj.value + '</td>';
+			});
+			html += '</tr>';		
+			return html;
+		}
+		
+		function formatDate(dateInMilis){
+			var date = new Date(dateInMilis);
+			var day = date.getDate();
+			var monthIndex = date.getMonth();
+			var year = date.getFullYear();
+			return day + '/' + monthIndex + '/' + year;
+		}
 
 		//]]>
 	</script>

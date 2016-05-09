@@ -1,5 +1,7 @@
 package com.pabloam.microservices.converter.history.services.impl;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -68,7 +70,9 @@ public class HistoryServicesImpl implements HistoryServices {
 			CurrencyQuery currencyQuery = createFromOriginal(originalQuery);
 			currencyQuery.setEmail(userName);
 			currencyQuery.setProvider(provider);
-
+			currencyQuery.setCreated(Instant.now(Clock.systemUTC()).toEpochMilli());
+			currencyQuery.setDeleted(false);
+			
 			this.currencyQueryRepository.saveCurrencyQuery(currencyQuery);
 			return true;
 

@@ -57,8 +57,12 @@ public class FrontRestController {
 
 		result = frontServices.query((String) session.getAttribute("email"), providerPrefix, accessToken, data);
 		if (result.containsKey("success")) {
-			this.publishingServices.publishInHistoryServices((String) session.getAttribute("email"), (String) data.get("provider"), accessToken,
-					(Map<String, Object>) result.get("success"));
+			try {
+				this.publishingServices.publishInHistoryServices((String) session.getAttribute("email"), (String) data.get("provider"), accessToken,
+						(Map<String, Object>) result.get("success"));
+			} catch (Exception e) {
+				logger.error("Error trying to persist the query in the history service.", e);
+			}
 		}
 
 		return result;

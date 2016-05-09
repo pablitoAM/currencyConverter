@@ -2,6 +2,8 @@
 
 A currency converter converter application as a software test.
 
+![Travis](https://travis-ci.org/pablitoAM/currencyConverter.svg?branch=master)
+
 The application has been implemented with microservices arquitecture patterns. It has a Discovery Service, an API Gateway and an OAuth2 login system wit Jwt tokens. All the communications between de services have been implemented via REST apis and the front-end has been implemented with Spring MVC as it was a requirement.
 
 Here is the architectural design.

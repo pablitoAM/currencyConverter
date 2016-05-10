@@ -17,9 +17,14 @@ $ mvn clean install
 ```
 After that copy the jar files with no extension such as "front-web.jar", which can be found in each target folder, into a common folder. Also copy the file startup.sh there.
 
-Finally run:
+Finally run for each module:
 ```
-$ sh startup.sh
+$ java -jar discovery-service.jar > discovery-service.log &
+$ java -jar discovery-services.jar > user-services.log &
+$ java -jar history-services.jar > history-services.log &
+$ java -jar discovery-services.jar > provider-services.log &
+$ java -jar web-front.jar > web-front.log &
+
 ```
 To test the application open the explorer with the url http://localhost:8080 for local instances.
 

@@ -105,7 +105,7 @@
 						$btn.prop('disabled', false);						
 					}).done(function(result){
 						if(result.success){
-							showSuccess(result.sucess);
+							showSuccess(result.success);
 						} else {
 							console.log('Error!!!');
 							showError(result.error);
@@ -140,11 +140,12 @@
 		}
 		
 		function showError(error){			
-			$('div[data-name="notifications"]').empty().text(error).removeClass("hidden");			
+			$('div[data-name="notifications"]').empty().text(error).removeClass("hidden");
 		}
 		
-		function showSuccess(sucess){
-			regAnchor.children().first().empty().addClass('bg-success').append(sucess + " registered sucessfully.");		
+		function showSuccess(success){
+			regAnchor.children().first().empty().addClass('bg-success').append(success + " registered sucessfully.");
+			$('div[data-name="notifications"]').empty().addClass("hidden");		
 		}
 		
 		function initDatePicker(){
